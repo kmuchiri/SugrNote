@@ -8,5 +8,9 @@
 - have an option to export data
 - generate reports
 - figure out (before meal, after meal or before breakfast, lunch, dinner, snack)
-
+- add option to enter insulin taken (how many units)
+- add summary page (day, week, month, 3 months)
+	- number of bg tests recorded
+	- share of high, very high, normal, low
+	- average fasting, before meal and after meal
 

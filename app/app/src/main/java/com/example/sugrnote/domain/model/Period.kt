@@ -6,6 +6,7 @@ enum class Period {
     AFTER_BREAKFAST,
     BEFORE_LUNCH,
     AFTER_LUNCH,
+    BEFORE_SLEEP,
     RANDOM;
 
     val displayLabel: String
@@ -15,6 +16,7 @@ enum class Period {
             AFTER_BREAKFAST -> "After Breakfast"
             BEFORE_LUNCH -> "Before Lunch"
             AFTER_LUNCH -> "After Lunch"
+            BEFORE_SLEEP -> "Before Sleep"
             RANDOM -> "Random"
         }
 }

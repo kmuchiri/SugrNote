@@ -22,6 +22,10 @@ class OverviewViewModel(
         System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
     ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val countLast7Days: StateFlow<Int> = repository.observeCountSince(
+        System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val userPreferences: StateFlow<UserPreferences> = settingsRepository.preferencesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferences())
 }

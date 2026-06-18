@@ -12,6 +12,8 @@ class GlucoseRepository(private val dao: GlucoseEntryDao) {
 
     fun observeAverageSince(sinceMillis: Long): Flow<Float?> = dao.observeAverageSince(sinceMillis)
 
+    fun observeCountSince(sinceMillis: Long): Flow<Int> = dao.observeCountSince(sinceMillis)
+
     suspend fun getEntryById(id: Long): GlucoseEntry? = dao.getById(id)
 
     suspend fun insertEntry(entry: GlucoseEntry): Long = dao.insert(entry)

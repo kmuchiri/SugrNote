@@ -55,6 +55,7 @@ fun OverviewScreen(
 ) {
     val latestEntry by viewModel.latestEntry.collectAsState()
     val average by viewModel.averageLast7Days.collectAsState()
+    val count by viewModel.countLast7Days.collectAsState()
     val prefs by viewModel.userPreferences.collectAsState()
     val context = LocalContext.current
 
@@ -199,17 +200,36 @@ fun OverviewScreen(
                     Spacer(Modifier.height(8.dp))
 
                     if (average != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                GlucoseUnitConverter.format(average!!, prefs.glucoseUnit),
-                                style = MaterialTheme.typography.displayLarge
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                prefs.glucoseUnit.displayLabel,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Text(
+                                    GlucoseUnitConverter.format(average!!, prefs.glucoseUnit),
+                                    style = MaterialTheme.typography.displayLarge
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    prefs.glucoseUnit.displayLabel,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    count.toString(),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Readings",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     } else {
                         Text(

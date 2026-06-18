@@ -29,4 +29,7 @@ interface GlucoseEntryDao {
 
     @Query("SELECT AVG(glucoseMgDl) FROM glucose_entries WHERE dateTime >= :sinceMillis")
     fun observeAverageSince(sinceMillis: Long): Flow<Float?>
+
+    @Query("SELECT COUNT(*) FROM glucose_entries WHERE dateTime >= :sinceMillis")
+    fun observeCountSince(sinceMillis: Long): Flow<Int>
 }

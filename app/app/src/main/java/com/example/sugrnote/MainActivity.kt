@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val initialRoute = if (intent?.action == "com.example.sugrnote.ACTION_ADD_ENTRY") {
-            Routes.ENTRY
+            "${Routes.ENTRY}?entryId={entryId}"
         } else {
             Routes.OVERVIEW
         }
@@ -156,7 +156,8 @@ private fun MainScreen(initialRoute: String = Routes.OVERVIEW) {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            startDestination = initialRoute
         )
     }
 }

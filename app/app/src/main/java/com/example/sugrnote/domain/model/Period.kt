@@ -6,6 +6,10 @@ enum class Period {
     AFTER_BREAKFAST,
     BEFORE_LUNCH,
     AFTER_LUNCH,
+    BEFORE_SNACK,
+    AFTER_SNACK,
+    BEFORE_DINNER,
+    AFTER_DINNER,
     BEFORE_SLEEP,
     RANDOM;
 
@@ -16,6 +20,10 @@ enum class Period {
             AFTER_BREAKFAST -> "After Breakfast"
             BEFORE_LUNCH -> "Before Lunch"
             AFTER_LUNCH -> "After Lunch"
+            BEFORE_SNACK -> "Before Snack"
+            AFTER_SNACK -> "After Snack"
+            BEFORE_DINNER -> "Before Dinner"
+            AFTER_DINNER -> "After Dinner"
             BEFORE_SLEEP -> "Before Sleep"
             RANDOM -> "Random"
         }

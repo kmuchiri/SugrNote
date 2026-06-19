@@ -1,5 +1,6 @@
 package com.example.sugrnote.ui.entry
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.sugrnote.domain.model.InsulinType
@@ -63,9 +65,13 @@ fun EntryScreen(
     onNavigateBack: () -> Unit
 ) {
     val prefs by viewModel.userPreferences.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.isSaved) {
-        if (viewModel.isSaved) onNavigateBack()
+        if (viewModel.isSaved) {
+            Toast.makeText(context, "Entry saved", Toast.LENGTH_SHORT).show()
+            onNavigateBack()
+        }
     }
 
     var showDatePicker by remember { mutableStateOf(false) }

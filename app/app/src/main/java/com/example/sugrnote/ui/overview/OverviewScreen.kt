@@ -105,6 +105,18 @@ fun OverviewScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val latestStatusColor = latestEntry?.let { entry ->
+                when (GlucoseStatus.fromValue(entry.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl)) {
+                    GlucoseStatus.LOW -> StatusLow
+                    GlucoseStatus.IN_RANGE -> StatusInRange
+                    GlucoseStatus.HIGH -> StatusHigh
+                }
+            }
+            val latestCardBgColor = latestStatusColor ?: MaterialTheme.colorScheme.surface
+            val latestCardContentColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.onSurface
+            val latestCardVariantColor = if (latestStatusColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+            val latestCardPrimaryColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.primary
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,7 +127,8 @@ fun OverviewScreen(
                         spotColor = shadowColor
                     ),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = latestCardBgColor,
+                    contentColor = latestCardContentColor
                 )
             ) {
                 Column(
@@ -124,7 +137,7 @@ fun OverviewScreen(
                     Text(
                         "Latest Reading",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = latestCardVariantColor
                     )
                     Spacer(Modifier.height(8.dp))
 
@@ -135,11 +148,6 @@ fun OverviewScreen(
                             prefs.lowThresholdMgDl,
                             prefs.highThresholdMgDl
                         )
-                        val statusColor = when (status) {
-                            GlucoseStatus.LOW -> StatusLow
-                            GlucoseStatus.IN_RANGE -> StatusInRange
-                            GlucoseStatus.HIGH -> StatusHigh
-                        }
                         val statusLabel = when (status) {
                             GlucoseStatus.LOW -> "Low"
                             GlucoseStatus.IN_RANGE -> "In Range"
@@ -158,7 +166,7 @@ fun OverviewScreen(
                             Text(
                                 prefs.glucoseUnit.displayLabel,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = latestCardVariantColor
                             )
                         }
 
@@ -168,19 +176,19 @@ fun OverviewScreen(
                             Surface(
                                 modifier = Modifier.size(10.dp),
                                 shape = CircleShape,
-                                color = statusColor
+                                color = Color.White
                             ) {}
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 statusLabel,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = statusColor
+                                color = Color.White
                             )
                             Spacer(Modifier.width(16.dp))
                             Text(
                                 entry.period.displayLabel,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = latestCardPrimaryColor
                             )
                         }
 
@@ -193,13 +201,13 @@ fun OverviewScreen(
                                 DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = latestCardVariantColor
                         )
                     } else {
                         Text(
                             "No readings yet",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = latestCardVariantColor
                         )
                     }
                 }
@@ -344,10 +352,77 @@ fun OverviewScreen(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         Text(
-                                            "Readings",
+                                            "Reading(s)",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                    }
+                                }
+                                
+                                Spacer(Modifier.height(16.dp))
+                                
+                                val total = stats.count.toFloat()
+                                val lowWeight = if (total > 0) stats.lowCount / total else 0f
+                                val inRangeWeight = if (total > 0) stats.inRangeCount / total else 0f
+                                val highWeight = if (total > 0) stats.highCount / total else 0f
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(12.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                ) {
+                                    if (lowWeight > 0f) {
+                                        Box(modifier = Modifier.weight(lowWeight).fillMaxHeight().background(StatusLow))
+                                    }
+                                    if (inRangeWeight > 0f) {
+                                        Box(modifier = Modifier.weight(inRangeWeight).fillMaxHeight().background(StatusInRange))
+                                    }
+                                    if (highWeight > 0f) {
+                                        Box(modifier = Modifier.weight(highWeight).fillMaxHeight().background(StatusHigh))
+                                    }
+                                }
+
+                                Spacer(Modifier.height(16.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    // Status breakdown
+                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(stats.lowCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusLow)
+                                            Text("Low", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(stats.inRangeCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusInRange)
+                                            Text("Target", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(stats.highCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusHigh)
+                                            Text("High", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    }
+
+                                    // Min/Max breakdown
+                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(
+                                                stats.min?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text("Lowest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(
+                                                stats.max?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text("Highest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
                                     }
                                 }
                             } else {

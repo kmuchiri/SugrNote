@@ -123,6 +123,14 @@ fun LogbookScreen(
                 )
             }
         } else {
+            val groupedEntries = remember(entries) {
+                entries.groupBy {
+                    val instant = Instant.ofEpochMilli(it.dateTime)
+                    val zoned = instant.atZone(ZoneId.systemDefault())
+                    zoned.format(DateTimeFormatter.ofPattern("EEE, dd MMM, yy"))
+                }
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -131,22 +139,32 @@ fun LogbookScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 88.dp)
             ) {
-                items(entries, key = { it.id }) { entry ->
-                    LogbookEntryCard(
-                        entry = entry,
-                        displayValue = GlucoseUnitConverter.format(
-                            entry.glucoseMgDl,
-                            prefs.glucoseUnit
-                        ),
-                        unitLabel = prefs.glucoseUnit.displayLabel,
-                        status = GlucoseStatus.fromValue(
-                            entry.glucoseMgDl,
-                            prefs.lowThresholdMgDl,
-                            prefs.highThresholdMgDl
-                        ),
-                        onClick = { onEntryClick(entry.id) },
-                        onDelete = { entryToDelete = entry }
-                    )
+                groupedEntries.forEach { (dateHeader, entriesForDate) ->
+                    item(key = "header_$dateHeader") {
+                        Text(
+                            text = dateHeader,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        )
+                    }
+                    items(entriesForDate, key = { it.id }) { entry ->
+                        LogbookEntryCard(
+                            entry = entry,
+                            displayValue = GlucoseUnitConverter.format(
+                                entry.glucoseMgDl,
+                                prefs.glucoseUnit
+                            ),
+                            unitLabel = prefs.glucoseUnit.displayLabel,
+                            status = GlucoseStatus.fromValue(
+                                entry.glucoseMgDl,
+                                prefs.lowThresholdMgDl,
+                                prefs.highThresholdMgDl
+                            ),
+                            onClick = { onEntryClick(entry.id) },
+                            onDelete = { entryToDelete = entry }
+                        )
+                    }
                 }
             }
         }

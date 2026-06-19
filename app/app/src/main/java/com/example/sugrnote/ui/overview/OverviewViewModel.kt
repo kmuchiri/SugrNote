@@ -37,6 +37,15 @@ class OverviewViewModel(
     val latestEntry: StateFlow<GlucoseEntry?> = repository.observeLatestEntry()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val latestLongActingEntry: StateFlow<GlucoseEntry?> = repository.observeLatestLongActing()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val latestShortActingEntry: StateFlow<GlucoseEntry?> = repository.observeLatestShortActing()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val userPreferences: StateFlow<UserPreferences> = settingsRepository.preferencesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferences())
+
     /** Stats for each carousel period, keyed by enum. */
     val periodStats: Map<StatsPeriod, StateFlow<PeriodStats>> =
         StatsPeriod.entries.associateWith { period ->
@@ -47,7 +56,4 @@ class OverviewViewModel(
             ) { avg, cnt -> PeriodStats(avg, cnt) }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PeriodStats(null, 0))
         }
-
-    val userPreferences: StateFlow<UserPreferences> = settingsRepository.preferencesFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferences())
 }

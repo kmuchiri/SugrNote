@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -64,6 +66,8 @@ fun OverviewScreen(
     onAddEntry: () -> Unit
 ) {
     val latestEntry by viewModel.latestEntry.collectAsState()
+    val latestLongActingEntry by viewModel.latestLongActingEntry.collectAsState()
+    val latestShortActingEntry by viewModel.latestShortActingEntry.collectAsState()
     val prefs by viewModel.userPreferences.collectAsState()
     val context = LocalContext.current
 
@@ -101,7 +105,6 @@ fun OverviewScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Latest reading card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -198,6 +201,82 @@ fun OverviewScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                }
+            }
+
+            if (latestLongActingEntry != null || latestShortActingEntry != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CardDefaults.shape,
+                            ambientColor = shadowColor,
+                            spotColor = shadowColor
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            "Latest Insulin",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(4.dp))
+                                if (latestLongActingEntry != null) {
+                                    val entry = latestLongActingEntry!!
+                                    Text(
+                                        "${entry.longActingUnits}u",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val instant = Instant.ofEpochMilli(entry.dateTime)
+                                    val zoned = instant.atZone(ZoneId.systemDefault())
+                                    Text(
+                                        zoned.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(4.dp))
+                                if (latestShortActingEntry != null) {
+                                    val entry = latestShortActingEntry!!
+                                    Text(
+                                        "${entry.shortActingUnits}u",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val instant = Instant.ofEpochMilli(entry.dateTime)
+                                    val zoned = instant.atZone(ZoneId.systemDefault())
+                                    Text(
+                                        zoned.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                        }
                     }
                 }
             }

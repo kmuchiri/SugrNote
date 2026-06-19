@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
@@ -86,9 +87,17 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        val initialRoute = Routes.OVERVIEW
+
         setContent {
-            SugrNoteTheme {
-                MainScreen()
+            val prefs by settingsRepo.preferencesFlow.collectAsState(
+                initial = com.example.sugrnote.data.settings.UserPreferences()
+            )
+            SugrNoteTheme(
+                themeMode = prefs.themeMode,
+                darkThemeStyle = prefs.darkThemeStyle
+            ) {
+                MainScreen(initialRoute = initialRoute)
             }
         }
     }
@@ -101,7 +110,7 @@ private data class BottomNavItem(
 )
 
 @Composable
-private fun MainScreen() {
+private fun MainScreen(initialRoute: String = Routes.OVERVIEW) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -143,7 +152,8 @@ private fun MainScreen() {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            startDestination = initialRoute
         )
     }
 }

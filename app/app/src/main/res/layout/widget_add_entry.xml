@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_add_bg"
+    android:gravity="start|center_vertical"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:gravity="bottom">
+        
+        <TextView
+            android:id="@+id/widget_text_reading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:textColor="#FFFFFF"
+            android:textSize="44sp"
+            android:fontFamily="sans-serif"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/widget_text_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#B3FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="6dp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="6dp">
+        
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:src="@drawable/widget_circle_indicator" />
+            
+        <TextView
+            android:id="@+id/widget_text_period"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_text_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#B3FFFFFF"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal" />
+
+    <TextView
+        android:id="@+id/widget_text_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tap to add"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp" />
+</LinearLayout>

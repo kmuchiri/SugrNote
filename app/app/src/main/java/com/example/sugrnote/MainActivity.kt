@@ -1,9 +1,13 @@
 package com.example.sugrnote
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
@@ -18,18 +22,70 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.sugrnote.data.local.AppDatabase
+import com.example.sugrnote.data.repository.GlucoseRepository
+import com.example.sugrnote.data.settings.SettingsRepository
+import com.example.sugrnote.notification.GlucoseNotificationManager
 import com.example.sugrnote.ui.navigation.AppNavHost
 import com.example.sugrnote.ui.navigation.Routes
 import com.example.sugrnote.ui.theme.SugrNoteTheme
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
+            // Whether granted or denied, we still try – the system silently drops
+            // notifications when permission is missing.
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Create notification channel (idempotent)
+        GlucoseNotificationManager.createChannel(this)
+
+        // Request notification permission on Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        // Observe latest entry + prefs and keep the notification in sync.
+        val db = AppDatabase.getInstance(applicationContext)
+        val glucoseRepo = GlucoseRepository(db.glucoseEntryDao())
+        val settingsRepo = SettingsRepository(applicationContext)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(
+                    glucoseRepo.observeLatestEntry(),
+                    settingsRepo.preferencesFlow
+                ) { entry, prefs -> entry to prefs }
+                    .collect { (entry, prefs) ->
+                        if (entry != null) {
+                            GlucoseNotificationManager.show(this@MainActivity, entry, prefs)
+                        } else {
+                            GlucoseNotificationManager.cancel(this@MainActivity)
+                        }
+                    }
+            }
+        }
+
         setContent {
             SugrNoteTheme {
                 MainScreen()

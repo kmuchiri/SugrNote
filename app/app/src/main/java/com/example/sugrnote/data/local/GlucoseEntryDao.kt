@@ -32,4 +32,13 @@ interface GlucoseEntryDao {
 
     @Query("SELECT COUNT(*) FROM glucose_entries WHERE dateTime >= :sinceMillis")
     fun observeCountSince(sinceMillis: Long): Flow<Int>
+
+    @Query("SELECT * FROM glucose_entries WHERE dateTime >= :sinceMillis")
+    fun observeEntriesSince(sinceMillis: Long): Flow<List<GlucoseEntry>>
+
+    @Query("SELECT * FROM glucose_entries WHERE longActingUnits IS NOT NULL ORDER BY dateTime DESC LIMIT 1")
+    fun observeLatestLongActing(): Flow<GlucoseEntry?>
+
+    @Query("SELECT * FROM glucose_entries WHERE shortActingUnits IS NOT NULL ORDER BY dateTime DESC LIMIT 1")
+    fun observeLatestShortActing(): Flow<GlucoseEntry?>
 }

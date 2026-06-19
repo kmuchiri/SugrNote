@@ -14,6 +14,8 @@ class GlucoseRepository(private val dao: GlucoseEntryDao) {
 
     fun observeCountSince(sinceMillis: Long): Flow<Int> = dao.observeCountSince(sinceMillis)
 
+    fun observeEntriesSince(sinceMillis: Long): Flow<List<GlucoseEntry>> = dao.observeEntriesSince(sinceMillis)
+
     suspend fun getEntryById(id: Long): GlucoseEntry? = dao.getById(id)
 
     suspend fun insertEntry(entry: GlucoseEntry): Long = dao.insert(entry)
@@ -21,4 +23,8 @@ class GlucoseRepository(private val dao: GlucoseEntryDao) {
     suspend fun updateEntry(entry: GlucoseEntry) = dao.update(entry)
 
     suspend fun deleteEntry(entry: GlucoseEntry) = dao.delete(entry)
+
+    fun observeLatestLongActing(): Flow<GlucoseEntry?> = dao.observeLatestLongActing()
+
+    fun observeLatestShortActing(): Flow<GlucoseEntry?> = dao.observeLatestShortActing()
 }

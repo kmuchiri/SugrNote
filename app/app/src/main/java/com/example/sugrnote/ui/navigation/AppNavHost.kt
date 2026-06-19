@@ -23,6 +23,7 @@ import com.example.sugrnote.ui.overview.OverviewViewModel
 import com.example.sugrnote.ui.settings.SettingsScreen
 import com.example.sugrnote.ui.settings.SettingsViewModel
 import com.example.sugrnote.ui.you.YouScreen
+import com.example.sugrnote.ui.you.YouViewModel
 
 object Routes {
     const val OVERVIEW = "overview"
@@ -83,7 +84,15 @@ fun AppNavHost(
         }
 
         composable(Routes.YOU) {
+            val vm: YouViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        YouViewModel(settingsRepository) as T
+                }
+            )
             YouScreen(
+                viewModel = vm,
                 onNavigateToSettings = {
                     navController.navigate(Routes.SETTINGS)
                 }

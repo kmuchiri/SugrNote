@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 
 class LogbookViewModel(
     private val repository: GlucoseRepository,
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    private val applicationContext: android.content.Context
 ) : ViewModel() {
 
     val entries: StateFlow<List<GlucoseEntry>> = repository.observeAllEntries()
@@ -25,6 +26,8 @@ class LogbookViewModel(
     fun deleteEntry(entry: GlucoseEntry) {
         viewModelScope.launch {
             repository.deleteEntry(entry)
+            // Notify widget to update
+            com.example.sugrnote.widget.AddEntryWidgetProvider.sendUpdateBroadcast(applicationContext)
         }
     }
 }

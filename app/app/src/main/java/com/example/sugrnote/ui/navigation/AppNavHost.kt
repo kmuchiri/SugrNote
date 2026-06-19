@@ -70,7 +70,7 @@ fun AppNavHost(
                 factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        LogbookViewModel(glucoseRepository, settingsRepository) as T
+                        LogbookViewModel(glucoseRepository, settingsRepository, context.applicationContext) as T
                 }
             )
             LogbookScreen(

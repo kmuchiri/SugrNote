@@ -36,7 +36,8 @@ object Routes {
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String = Routes.OVERVIEW
 ) {
     val context = LocalContext.current
     val database = AppDatabase.getInstance(context)
@@ -45,7 +46,7 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.OVERVIEW,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         composable(Routes.OVERVIEW) {
@@ -132,13 +133,18 @@ fun AppNavHost(
                         EntryViewModel(
                             glucoseRepository,
                             settingsRepository,
+                            context.applicationContext,
                             actualEntryId
                         ) as T
                 }
             )
             EntryScreen(
                 viewModel = vm,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = {
+                    if (!navController.popBackStack()) {
+                        (context as? android.app.Activity)?.finish()
+                    }
+                }
             )
         }
     }

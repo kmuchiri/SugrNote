@@ -87,7 +87,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val initialRoute = Routes.OVERVIEW
+        val initialRoute = if (intent?.action == "com.example.sugrnote.ACTION_ADD_ENTRY") {
+            Routes.ENTRY
+        } else {
+            Routes.OVERVIEW
+        }
 
         setContent {
             val prefs by settingsRepo.preferencesFlow.collectAsState(
@@ -152,8 +156,7 @@ private fun MainScreen(initialRoute: String = Routes.OVERVIEW) {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding),
-            startDestination = initialRoute
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }

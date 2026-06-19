@@ -27,6 +27,7 @@ import java.time.ZoneId
 class EntryViewModel(
     private val repository: GlucoseRepository,
     settingsRepository: SettingsRepository,
+    private val applicationContext: android.content.Context,
     private val entryId: Long? = null
 ) : ViewModel() {
 
@@ -232,6 +233,10 @@ class EntryViewModel(
             } else {
                 repository.insertEntry(entry)
             }
+            
+            // Notify widget to update
+            com.example.sugrnote.widget.AddEntryWidgetProvider.sendUpdateBroadcast(applicationContext)
+            
             isSaved = true
         }
     }

@@ -19,6 +19,8 @@ class SettingsRepository(private val context: Context) {
         val GLUCOSE_UNIT = stringPreferencesKey("glucose_unit")
         val LOW_THRESHOLD = floatPreferencesKey("low_threshold_mg_dl")
         val HIGH_THRESHOLD = floatPreferencesKey("high_threshold_mg_dl")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+        val DARK_THEME_STYLE = stringPreferencesKey("dark_theme_style")
     }
 
     val preferencesFlow: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -27,7 +29,13 @@ class SettingsRepository(private val context: Context) {
                 try { GlucoseUnit.valueOf(it) } catch (_: Exception) { GlucoseUnit.MG_DL }
             } ?: GlucoseUnit.MG_DL,
             lowThresholdMgDl = prefs[Keys.LOW_THRESHOLD] ?: 70f,
-            highThresholdMgDl = prefs[Keys.HIGH_THRESHOLD] ?: 180f
+            highThresholdMgDl = prefs[Keys.HIGH_THRESHOLD] ?: 180f,
+            themeMode = prefs[Keys.THEME_MODE]?.let {
+                try { ThemeMode.valueOf(it) } catch (_: Exception) { ThemeMode.SYSTEM }
+            } ?: ThemeMode.SYSTEM,
+            darkThemeStyle = prefs[Keys.DARK_THEME_STYLE]?.let {
+                try { DarkThemeStyle.valueOf(it) } catch (_: Exception) { DarkThemeStyle.STANDARD }
+            } ?: DarkThemeStyle.STANDARD
         )
     }
 
@@ -41,5 +49,13 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setHighThreshold(mgDl: Float) {
         context.dataStore.edit { it[Keys.HIGH_THRESHOLD] = mgDl }
+    }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        context.dataStore.edit { it[Keys.THEME_MODE] = mode.name }
+    }
+
+    suspend fun setDarkThemeStyle(style: DarkThemeStyle) {
+        context.dataStore.edit { it[Keys.DARK_THEME_STYLE] = style.name }
     }
 }

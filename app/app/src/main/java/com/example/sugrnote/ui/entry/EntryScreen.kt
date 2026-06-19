@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -153,7 +154,23 @@ fun EntryScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        }
+        },
+        bottomBar = {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = { viewModel.saveEntry() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Save")
+                }
+            }
+        },
+        contentWindowInsets = WindowInsets(0.dp)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -324,15 +341,6 @@ fun EntryScreen(
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            // Save button
-            Button(
-                onClick = { viewModel.saveEntry() },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Save")
-            }
         }
     }
 }

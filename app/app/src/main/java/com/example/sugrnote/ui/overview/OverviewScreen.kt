@@ -1,7 +1,9 @@
 package com.example.sugrnote.ui.overview
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.sugrnote.domain.model.GlucoseStatus
@@ -54,10 +59,11 @@ fun OverviewScreen(
     onAddEntry: () -> Unit
 ) {
     val latestEntry by viewModel.latestEntry.collectAsState()
-    val average by viewModel.averageLast7Days.collectAsState()
-    val count by viewModel.countLast7Days.collectAsState()
     val prefs by viewModel.userPreferences.collectAsState()
     val context = LocalContext.current
+
+    val periods = StatsPeriod.entries
+    val pagerState = rememberPagerState(pageCount = { periods.size })
 
     Scaffold(
         topBar = {
@@ -181,7 +187,7 @@ fun OverviewScreen(
                 }
             }
 
-            // 7-day average card
+            // Averages carousel
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -189,54 +195,91 @@ fun OverviewScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        "7-Day Average",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
+                Column {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        val period = periods[page]
+                        val stats by viewModel.periodStats[period]!!.collectAsState()
 
-                    if (average != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                "${period.label} Average",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(8.dp))
+
+                            if (stats.average != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.Bottom) {
+                                        Text(
+                                            GlucoseUnitConverter.format(
+                                                stats.average!!,
+                                                prefs.glucoseUnit
+                                            ),
+                                            style = MaterialTheme.typography.displayLarge
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            prefs.glucoseUnit.displayLabel,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text(
+                                            stats.count.toString(),
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            "Readings",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            } else {
                                 Text(
-                                    GlucoseUnitConverter.format(average!!, prefs.glucoseUnit),
-                                    style = MaterialTheme.typography.displayLarge
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    prefs.glucoseUnit.displayLabel,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    count.toString(),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    "Readings",
-                                    style = MaterialTheme.typography.bodySmall,
+                                    "No data available",
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
-                    } else {
-                        Text(
-                            "No data available",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    }
+
+                    // Page indicators
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        periods.forEachIndexed { index, _ ->
+                            val isSelected = pagerState.currentPage == index
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .size(if (isSelected) 8.dp else 6.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.outlineVariant
+                                    )
+                            )
+                        }
                     }
                 }
             }

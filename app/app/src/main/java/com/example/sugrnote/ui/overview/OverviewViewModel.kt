@@ -9,6 +9,7 @@ import com.example.sugrnote.data.settings.UserPreferences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -22,6 +23,15 @@ data class PeriodStats(
     val highCount: Int,
     val min: Float?,
     val max: Float?
+)
+
+/**
+ * Holds insulin stats for the last 24 hours.
+ */
+data class InsulinStats24h(
+    val longActing: Float,
+    val shortActing: Float,
+    val total: Float
 )
 
 /**
@@ -50,6 +60,18 @@ class OverviewViewModel(
 
     val userPreferences: StateFlow<UserPreferences> = settingsRepository.preferencesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferences())
+
+    val insulinStats24h: StateFlow<InsulinStats24h> = repository.observeEntriesSince(System.currentTimeMillis() - 24 * 60 * 60 * 1000L)
+        .map { entries ->
+            var longActing = 0f
+            var shortActing = 0f
+            entries.forEach { entry ->
+                longActing += entry.longActingUnits ?: 0f
+                shortActing += entry.shortActingUnits ?: 0f
+            }
+            InsulinStats24h(longActing, shortActing, longActing + shortActing)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinStats24h(0f, 0f, 0f))
 
     /** Stats for each carousel period, keyed by enum. */
     val periodStats: Map<StatsPeriod, StateFlow<PeriodStats>> =

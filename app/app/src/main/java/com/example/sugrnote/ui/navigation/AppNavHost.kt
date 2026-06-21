@@ -61,6 +61,9 @@ fun AppNavHost(
                 viewModel = vm,
                 onAddEntry = {
                     navController.navigate(Routes.ENTRY)
+                },
+                onEntryClick = { entryId ->
+                    navController.navigate("${Routes.ENTRY}?entryId=$entryId")
                 }
             )
         }

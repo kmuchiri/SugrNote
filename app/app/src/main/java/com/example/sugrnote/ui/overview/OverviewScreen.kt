@@ -63,7 +63,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun OverviewScreen(
     viewModel: OverviewViewModel,
-    onAddEntry: () -> Unit
+    onAddEntry: () -> Unit,
+    onEntryClick: (Long) -> Unit = {}
 ) {
     val latestEntry by viewModel.latestEntry.collectAsState()
     val latestLongActingEntry by viewModel.latestLongActingEntry.collectAsState()
@@ -127,6 +128,9 @@ fun OverviewScreen(
                         ambientColor = shadowColor,
                         spotColor = shadowColor
                     ),
+                onClick = {
+                    latestEntry?.let { onEntryClick(it.id) }
+                },
                 colors = CardDefaults.cardColors(
                     containerColor = latestCardBgColor,
                     contentColor = latestCardContentColor

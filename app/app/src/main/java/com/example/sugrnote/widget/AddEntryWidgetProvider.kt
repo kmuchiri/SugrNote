@@ -103,7 +103,7 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
             
             val instant = java.time.Instant.ofEpochMilli(latestEntry.dateTime)
             val zoned = instant.atZone(java.time.ZoneId.systemDefault())
-            views.setTextViewText(R.id.widget_text_time, zoned.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")))
+            views.setTextViewText(R.id.widget_text_time, com.example.sugrnote.domain.util.DateTimeUtils.formatDateTime(zoned, prefs))
             
             // Note: Since widget_add_bg is a shape drawable, we can tint its background dynamically
             // Requires API 31+ for setIcon, but we can just use setColorFilter on the background

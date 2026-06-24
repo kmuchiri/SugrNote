@@ -112,4 +112,16 @@ class SettingsViewModel(
         }
         validationError = null
     }
+
+    fun onIs24HourClockChanged(is24Hour: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setIs24HourClock(is24Hour)
+        }
+    }
+
+    fun onDateFormatChanged(format: com.example.sugrnote.data.settings.DateFormatOption) {
+        viewModelScope.launch {
+            settingsRepository.setDateFormat(format)
+        }
+    }
 }

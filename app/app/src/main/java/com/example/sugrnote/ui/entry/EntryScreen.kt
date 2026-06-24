@@ -56,7 +56,7 @@ import com.example.sugrnote.domain.model.Period
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import com.example.sugrnote.domain.util.DateTimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -189,7 +189,7 @@ fun EntryScreen(
             // Date field
             Text("Date", style = MaterialTheme.typography.labelLarge)
             OutlinedTextField(
-                value = viewModel.date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")),
+                value = DateTimeUtils.formatDate(viewModel.date, prefs),
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -203,7 +203,7 @@ fun EntryScreen(
             // Time field
             Text("Time", style = MaterialTheme.typography.labelLarge)
             OutlinedTextField(
-                value = viewModel.time.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                value = DateTimeUtils.formatTime(viewModel.time, prefs),
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),

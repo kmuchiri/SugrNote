@@ -3,6 +3,7 @@ package com.example.sugrnote.data.settings
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -21,6 +22,8 @@ class SettingsRepository(private val context: Context) {
         val HIGH_THRESHOLD = floatPreferencesKey("high_threshold_mg_dl")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DARK_THEME_STYLE = stringPreferencesKey("dark_theme_style")
+        val IS_24_HOUR_CLOCK = booleanPreferencesKey("is_24_hour_clock")
+        val DATE_FORMAT = stringPreferencesKey("date_format")
     }
 
     val preferencesFlow: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -35,7 +38,11 @@ class SettingsRepository(private val context: Context) {
             } ?: ThemeMode.SYSTEM,
             darkThemeStyle = prefs[Keys.DARK_THEME_STYLE]?.let {
                 try { DarkThemeStyle.valueOf(it) } catch (_: Exception) { DarkThemeStyle.STANDARD }
-            } ?: DarkThemeStyle.STANDARD
+            } ?: DarkThemeStyle.STANDARD,
+            is24HourClock = prefs[Keys.IS_24_HOUR_CLOCK] ?: false,
+            dateFormat = prefs[Keys.DATE_FORMAT]?.let {
+                try { DateFormatOption.valueOf(it) } catch (_: Exception) { DateFormatOption.MMM_DD_YYYY }
+            } ?: DateFormatOption.MMM_DD_YYYY
         )
     }
 
@@ -57,5 +64,13 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setDarkThemeStyle(style: DarkThemeStyle) {
         context.dataStore.edit { it[Keys.DARK_THEME_STYLE] = style.name }
+    }
+
+    suspend fun setIs24HourClock(is24Hour: Boolean) {
+        context.dataStore.edit { it[Keys.IS_24_HOUR_CLOCK] = is24Hour }
+    }
+
+    suspend fun setDateFormat(format: DateFormatOption) {
+        context.dataStore.edit { it[Keys.DATE_FORMAT] = format.name }
     }
 }

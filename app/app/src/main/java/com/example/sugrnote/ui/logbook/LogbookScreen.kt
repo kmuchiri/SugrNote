@@ -53,7 +53,7 @@ import com.example.sugrnote.ui.theme.StatusInRange
 import com.example.sugrnote.ui.theme.StatusLow
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import com.example.sugrnote.domain.util.DateTimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,7 +127,7 @@ fun LogbookScreen(
                 entries.groupBy {
                     val instant = Instant.ofEpochMilli(it.dateTime)
                     val zoned = instant.atZone(ZoneId.systemDefault())
-                    zoned.format(DateTimeFormatter.ofPattern("EEE, dd MMM, yy"))
+                    DateTimeUtils.formatDayHeader(zoned, prefs)
                 }
             }
 
@@ -161,6 +161,7 @@ fun LogbookScreen(
                                 prefs.lowThresholdMgDl,
                                 prefs.highThresholdMgDl
                             ),
+                            prefs = prefs,
                             onClick = { onEntryClick(entry.id) },
                             onDelete = { entryToDelete = entry }
                         )
@@ -177,13 +178,14 @@ private fun LogbookEntryCard(
     displayValue: String,
     unitLabel: String,
     status: GlucoseStatus,
+    prefs: com.example.sugrnote.data.settings.UserPreferences,
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
     val instant = Instant.ofEpochMilli(entry.dateTime)
     val zoned = instant.atZone(ZoneId.systemDefault())
-    val dateStr = zoned.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
-    val timeStr = zoned.format(DateTimeFormatter.ofPattern("hh:mm a"))
+    val dateStr = DateTimeUtils.formatDate(zoned, prefs)
+    val timeStr = DateTimeUtils.formatTime(zoned, prefs)
 
     val statusColor = when (status) {
         GlucoseStatus.LOW -> StatusLow

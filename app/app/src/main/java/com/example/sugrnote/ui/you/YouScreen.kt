@@ -40,7 +40,8 @@ import com.example.sugrnote.data.settings.ThemeMode
 @Composable
 fun YouScreen(
     viewModel: YouViewModel,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToDateTimeSettings: () -> Unit
 ) {
     val prefs by viewModel.userPreferences.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -92,6 +93,22 @@ fun YouScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onNavigateToSettings)
+            )
+
+            ListItem(
+                headlineContent = { Text("Date and time") },
+                leadingContent = {
+                    Icon(Icons.Default.Settings, contentDescription = null)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onNavigateToDateTimeSettings)
             )
 
             Text(

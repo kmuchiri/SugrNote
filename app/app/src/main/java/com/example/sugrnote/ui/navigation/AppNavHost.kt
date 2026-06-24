@@ -20,8 +20,11 @@ import com.example.sugrnote.ui.logbook.LogbookScreen
 import com.example.sugrnote.ui.logbook.LogbookViewModel
 import com.example.sugrnote.ui.overview.OverviewScreen
 import com.example.sugrnote.ui.overview.OverviewViewModel
+import com.example.sugrnote.ui.settings.DateTimeSettingsScreen
 import com.example.sugrnote.ui.settings.SettingsScreen
 import com.example.sugrnote.ui.settings.SettingsViewModel
+import com.example.sugrnote.ui.trends.TrendsScreen
+import com.example.sugrnote.ui.trends.TrendsViewModel
 import com.example.sugrnote.ui.you.YouScreen
 import com.example.sugrnote.ui.you.YouViewModel
 
@@ -30,6 +33,8 @@ object Routes {
     const val LOGBOOK = "logbook"
     const val YOU = "you"
     const val SETTINGS = "settings"
+    const val DATE_TIME_SETTINGS = "date_time_settings"
+    const val TRENDS = "trends"
     const val ENTRY = "entry"
 }
 
@@ -57,8 +62,16 @@ fun AppNavHost(
                         OverviewViewModel(glucoseRepository, settingsRepository) as T
                 }
             )
+            val trendsVm: TrendsViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        TrendsViewModel(glucoseRepository, settingsRepository) as T
+                }
+            )
             OverviewScreen(
                 viewModel = vm,
+                trendsViewModel = trendsVm,
                 onAddEntry = {
                     navController.navigate(Routes.ENTRY)
                 },
@@ -99,6 +112,9 @@ fun AppNavHost(
                 viewModel = vm,
                 onNavigateToSettings = {
                     navController.navigate(Routes.SETTINGS)
+                },
+                onNavigateToDateTimeSettings = {
+                    navController.navigate(Routes.DATE_TIME_SETTINGS)
                 }
             )
         }
@@ -116,6 +132,22 @@ fun AppNavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
+
+        composable(Routes.DATE_TIME_SETTINGS) {
+            val vm: SettingsViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        SettingsViewModel(settingsRepository) as T
+                }
+            )
+            DateTimeSettingsScreen(
+                viewModel = vm,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+
 
         composable(
             route = "${Routes.ENTRY}?entryId={entryId}",

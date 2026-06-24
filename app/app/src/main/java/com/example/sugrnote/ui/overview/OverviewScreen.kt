@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,12 +58,13 @@ import com.example.sugrnote.ui.theme.StatusInRange
 import com.example.sugrnote.ui.theme.StatusLow
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import com.example.sugrnote.domain.util.DateTimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewScreen(
     viewModel: OverviewViewModel,
+    trendsViewModel: com.example.sugrnote.ui.trends.TrendsViewModel,
     onAddEntry: () -> Unit,
     onEntryClick: (Long) -> Unit = {}
 ) {
@@ -71,6 +73,8 @@ fun OverviewScreen(
     val latestShortActingEntry by viewModel.latestShortActingEntry.collectAsState()
     val insulinStats24h by viewModel.insulinStats24h.collectAsState()
     val prefs by viewModel.userPreferences.collectAsState()
+    val selectedTimeRange by trendsViewModel.selectedTimeRange.collectAsState()
+    val aggregatedData by trendsViewModel.aggregatedData.collectAsState()
     val context = LocalContext.current
 
     val periods = StatsPeriod.entries
@@ -202,9 +206,7 @@ fun OverviewScreen(
                         val instant = Instant.ofEpochMilli(entry.dateTime)
                         val zoned = instant.atZone(ZoneId.systemDefault())
                         Text(
-                            zoned.format(
-                                DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")
-                            ),
+                            DateTimeUtils.formatDateTime(zoned, prefs),
                             style = MaterialTheme.typography.bodySmall,
                             color = latestCardVariantColor
                         )
@@ -218,146 +220,58 @@ fun OverviewScreen(
                 }
             }
 
-            if (latestLongActingEntry != null || latestShortActingEntry != null || insulinStats24h.total > 0f) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = CardDefaults.shape,
-                            ambientColor = shadowColor,
-                            spotColor = shadowColor
-                        ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+            // Trends Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = CardDefaults.shape,
+                        ambientColor = shadowColor,
+                        spotColor = shadowColor
+                    ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        "Trending Glucose",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp)
+                    Spacer(Modifier.height(12.dp))
+                    
+                    // Time Range Selector
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text(
-                            "Latest Insulin Dose",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Spacer(Modifier.height(4.dp))
-                                if (latestLongActingEntry != null) {
-                                    val entry = latestLongActingEntry!!
-                                    Text(
-                                        "${entry.longActingUnits}u",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    val instant = Instant.ofEpochMilli(entry.dateTime)
-                                    val zoned = instant.atZone(ZoneId.systemDefault())
-                                    Text(
-                                        zoned.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                } else {
-                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                                }
-                            }
-                            
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Spacer(Modifier.height(4.dp))
-                                if (latestShortActingEntry != null) {
-                                    val entry = latestShortActingEntry!!
-                                    Text(
-                                        "${entry.shortActingUnits}u",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    val instant = Instant.ofEpochMilli(entry.dateTime)
-                                    val zoned = instant.atZone(ZoneId.systemDefault())
-                                    Text(
-                                        zoned.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                } else {
-                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                                }
-                            }
-                        }
-
-                        if (insulinStats24h.total > 0f) {
-                            val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else value.toString() }
-                            Spacer(Modifier.height(12.dp))
-                            
-                            Text(
-                                "Last 24 Hours",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        com.example.sugrnote.ui.trends.TimeRange.entries.forEach { range ->
+                            androidx.compose.material3.FilterChip(
+                                selected = selectedTimeRange == range,
+                                onClick = { trendsViewModel.setTimeRange(range) },
+                                label = { Text(range.display) },
+                                colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
-                            Spacer(Modifier.height(12.dp))
-                            
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
-                            ) {
-                                Text(
-                                    "${formatInsulin(insulinStats24h.total)}u",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    "Total",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(bottom = 6.dp)
-                                )
-                            }
-                            
-                            Spacer(Modifier.height(12.dp))
-                            
-                            val totalFloat = insulinStats24h.total
-                            val longWeight = if (totalFloat > 0f) insulinStats24h.longActing / totalFloat else 0f
-                            val shortWeight = if (totalFloat > 0f) insulinStats24h.shortActing / totalFloat else 0f
-                            
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(12.dp)
-                                    .clip(RoundedCornerShape(6.dp))
-                            ) {
-                                if (longWeight > 0f) {
-                                    Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
-                                }
-                                if (shortWeight > 0f) {
-                                    Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
-                                }
-                            }
-                            
-                            Spacer(Modifier.height(12.dp))
-                            
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("${formatInsulin(insulinStats24h.longActing)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("${formatInsulin(insulinStats24h.shortActing)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
                         }
+                    }
+
+                    // Graph Area
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .padding(top = 16.dp)
+                    ) {
+                        com.example.sugrnote.ui.trends.TrendsGraph(
+                            data = aggregatedData,
+                            prefs = prefs,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -527,6 +441,152 @@ fun OverviewScreen(
                                         else MaterialTheme.colorScheme.outlineVariant
                                     )
                             )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if (latestLongActingEntry != null || latestShortActingEntry != null || insulinStats24h.total > 0f) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CardDefaults.shape,
+                            ambientColor = shadowColor,
+                            spotColor = shadowColor
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            "Latest Insulin Dose",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(4.dp))
+                                if (latestLongActingEntry != null) {
+                                    val entry = latestLongActingEntry!!
+                                    Text(
+                                        "${entry.longActingUnits}u",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val instant = Instant.ofEpochMilli(entry.dateTime)
+                                    val zoned = instant.atZone(ZoneId.systemDefault())
+                                    Text(
+                                        DateTimeUtils.formatTime(zoned, prefs),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(4.dp))
+                                if (latestShortActingEntry != null) {
+                                    val entry = latestShortActingEntry!!
+                                    Text(
+                                        "${entry.shortActingUnits}u",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val instant = Instant.ofEpochMilli(entry.dateTime)
+                                    val zoned = instant.atZone(ZoneId.systemDefault())
+                                    Text(
+                                        DateTimeUtils.formatTime(zoned, prefs),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                }
+                            }
+                        }
+
+                        if (insulinStats24h.total > 0f) {
+                            val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else value.toString() }
+                            Spacer(Modifier.height(12.dp))
+                            
+                            Text(
+                                "Last 24 Hours",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Text(
+                                    "${formatInsulin(insulinStats24h.total)}u",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    "Total",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                            }
+                            
+                            Spacer(Modifier.height(12.dp))
+                            
+                            val totalFloat = insulinStats24h.total
+                            val longWeight = if (totalFloat > 0f) insulinStats24h.longActing / totalFloat else 0f
+                            val shortWeight = if (totalFloat > 0f) insulinStats24h.shortActing / totalFloat else 0f
+                            
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(12.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                            ) {
+                                if (longWeight > 0f) {
+                                    Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
+                                }
+                                if (shortWeight > 0f) {
+                                    Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
+                                }
+                            }
+                            
+                            Spacer(Modifier.height(12.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("${formatInsulin(insulinStats24h.longActing)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("${formatInsulin(insulinStats24h.shortActing)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
                         }
                     }
                 }

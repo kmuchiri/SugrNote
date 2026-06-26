@@ -217,31 +217,29 @@ fun TrendsGraph(
         )
 
         if (data is TrendsData.Aggregated) {
-            val buckets = 49
+            val buckets = 25
             val bucketWidth = graphWidth / (buckets - 1)
 
             for (i in 0 until buckets) {
                 val xPos = xPadding + (i * bucketWidth)
-                if (i % 2 == 0) {
-                    val hour = i / 2
-                    drawLine(
-                        color = Color.Gray,
-                        start = Offset(xPos, graphHeight),
-                        end = Offset(xPos, graphHeight + 15f),
-                        strokeWidth = 2f
-                    )
-                    if (hour % 4 == 0) {
-                        if (prefs.is24HourClock) {
-                            drawContext.canvas.nativeCanvas.drawText(
-                                String.format(Locale.getDefault(), "%02dH", hour),
-                                xPos, graphHeight + 50f, xLabelPaint
-                            )
-                        } else {
-                            val amPm = if (hour < 12) "AM" else "PM"
-                            val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
-                            drawContext.canvas.nativeCanvas.drawText(displayHour.toString(), xPos, graphHeight + 40f, xLabelPaint)
-                            drawContext.canvas.nativeCanvas.drawText(amPm, xPos, graphHeight + 75f, xLabelPaint)
-                        }
+                val hour = i
+                drawLine(
+                    color = Color.Gray,
+                    start = Offset(xPos, graphHeight),
+                    end = Offset(xPos, graphHeight + 15f),
+                    strokeWidth = 2f
+                )
+                if (hour % 4 == 0) {
+                    if (prefs.is24HourClock) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            String.format(Locale.getDefault(), "%02dH", hour),
+                            xPos, graphHeight + 50f, xLabelPaint
+                        )
+                    } else {
+                        val amPm = if (hour < 12) "AM" else "PM"
+                        val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
+                        drawContext.canvas.nativeCanvas.drawText(displayHour.toString(), xPos, graphHeight + 40f, xLabelPaint)
+                        drawContext.canvas.nativeCanvas.drawText(amPm, xPos, graphHeight + 75f, xLabelPaint)
                     }
                 }
             }

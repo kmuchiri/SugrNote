@@ -48,7 +48,7 @@ class TrendsViewModel(
         if (timeRange == TimeRange.DAY_1) {
             return@combine TrendsData.Raw(entries)
         }
-        val buckets = Array<MutableList<Float>>(48) { mutableListOf() }
+        val buckets = Array<MutableList<Float>>(24) { mutableListOf() }
         val zoneId = ZoneId.systemDefault()
 
         entries.forEach { entry ->
@@ -56,7 +56,13 @@ class TrendsViewModel(
             val zoned = instant.atZone(zoneId)
             val hour = zoned.hour
             val minute = zoned.minute
-            val bucketIndex = (hour * 2) + (minute / 30)
+            
+            // Round to nearest hour: if minute >= 30, bucket is (hour + 1) % 24
+            val bucketIndex = if (minute >= 30) {
+                (hour + 1) % 24
+            } else {
+                hour
+            }
             
             // We use the raw MgDl value for calculation, convert to user unit later
             buckets[bucketIndex].add(entry.glucoseMgDl.toFloat())
@@ -74,7 +80,7 @@ class TrendsViewModel(
                 }
             }
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TrendsData.Aggregated(List(48) { null }))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TrendsData.Aggregated(List(24) { null }))
 
     fun setTimeRange(range: TimeRange) {
         _selectedTimeRange.value = range

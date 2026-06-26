@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="297mm"
+   height="210mm"
+   viewBox="0 0 297 210"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   sodipodi:docname="app_banner.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#ffffff"
+     borderopacity="0"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#ffffff"
+     inkscape:document-units="mm"
+     showborder="true"
+     borderlayer="false"
+     inkscape:zoom="0.36522465"
+     inkscape:cx="1047.3006"
+     inkscape:cy="1155.4532"
+     inkscape:window-width="1021"
+     inkscape:window-height="1014"
+     inkscape:window-x="23"
+     inkscape:window-y="15"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect1"
+       style="fill:#840425;stroke-width:0.594623;stroke:none;fill-opacity:1"
+       d="M 101.40415 73.835803 L 101.40415 359.5858 L 609.40415 359.5858 L 609.40415 73.835803 L 101.40415 73.835803 z M 109.54163 81.773303 L 601.26666 81.773303 C 601.37746 81.773303 601.46665 81.862491 601.46665 81.973291 L 601.46665 351.44832 C 601.46665 351.55912 601.37746 351.6483 601.26666 351.6483 L 109.54163 351.6483 C 109.43083 351.6483 109.34165 351.55912 109.34165 351.44832 L 109.34165 81.973291 C 109.34165 81.862491 109.43083 81.773303 109.54163 81.773303 z " />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:22.5778px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.185208"
+       x="303.08792"
+       y="217.14906"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:0.185208;fill:#000000"
+         x="303.08792"
+         y="217.14906" /></text>
+    <rect
+       style="fill:#840425;fill-opacity:1;stroke:none;stroke-width:0.185208"
+       id="rect2"
+       width="265.19696"
+       height="53.305923"
+       x="227.8828"
+       y="185.23805"
+       rx="0.30000001"
+       ry="0.30000001" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:42.3333px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:0.185208"
+       x="246.05428"
+       y="221.62766"
+       id="text2"
+       inkscape:export-filename="sugrNotes-banner.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-size:42.3333px;fill:#f2f2f2;fill-opacity:1;stroke-width:0.185208"
+         x="246.05428"
+         y="221.62766">sugrNotes</tspan></text>
+  </g>
+</svg>

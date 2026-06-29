@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.sugrnote.domain.model.GlucoseStatus
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
 import com.example.sugrnote.ui.theme.StatusHigh
@@ -59,6 +60,14 @@ import com.example.sugrnote.ui.theme.StatusLow
 import java.time.Instant
 import java.time.ZoneId
 import com.example.sugrnote.domain.util.DateTimeUtils
+
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import com.example.sugrnote.R // Make sure to import your app's R class
+
+val MyCustomFontFamily = FontFamily(
+    Font(R.font.baflion)
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,11 +95,18 @@ fun OverviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("SugrNote") },
+                title = { 
+                    Text(
+                        "SugrNote",
+                        fontFamily = MyCustomFontFamily,
+                        fontSize = 28.sp
+                    ) 
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                windowInsets = WindowInsets(0.dp)
             )
         },
         floatingActionButton = {
@@ -107,7 +123,7 @@ fun OverviewScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

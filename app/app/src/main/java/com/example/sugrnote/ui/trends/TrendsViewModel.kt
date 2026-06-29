@@ -17,10 +17,11 @@ import java.time.Instant
 import java.time.ZoneId
 
 enum class TimeRange(val display: String, val days: Int) {
-    DAY_1("24 Hours", 1),
-    DAYS_7("7 Days", 7),
-    DAYS_14("14 Days", 14),
-    DAYS_30("30 Days", 30)
+    DAY_1("24H", 1),
+    DAYS_7("7D", 7),
+    DAYS_14("14D", 14),
+    DAYS_30("30D", 30),
+    DAYS_90("90D", 90)
 }
 
 class TrendsViewModel(

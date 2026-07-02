@@ -29,6 +29,8 @@ enum class BasePeriod(val displayLabel: String) {
     BEFORE_MEAL("Before Meal"),
     AFTER_MEAL("After Meal"),
     BEFORE_SLEEP("Before Sleep"),
+    BEFORE_EXERCISE("Before Exercise"),
+    AFTER_EXERCISE("After Exercise"),
     RANDOM("Random")
 }
 
@@ -125,6 +127,8 @@ class EntryViewModel(
                     Period.BEFORE_BREAKFAST, Period.BEFORE_LUNCH, Period.BEFORE_DINNER, Period.BEFORE_SNACK -> BasePeriod.BEFORE_MEAL
                     Period.AFTER_BREAKFAST, Period.AFTER_LUNCH, Period.AFTER_DINNER, Period.AFTER_SNACK -> BasePeriod.AFTER_MEAL
                     Period.BEFORE_SLEEP -> BasePeriod.BEFORE_SLEEP
+                    Period.BEFORE_EXERCISE -> BasePeriod.BEFORE_EXERCISE
+                    Period.AFTER_EXERCISE -> BasePeriod.AFTER_EXERCISE
                     Period.RANDOM -> BasePeriod.RANDOM
                 }
                 mealType = when (period) {
@@ -155,7 +159,8 @@ class EntryViewModel(
         basePeriod = newPeriod
         when (newPeriod) {
             BasePeriod.BEFORE_MEAL -> onHasFoodChanged(true)
-            BasePeriod.FASTING, BasePeriod.RANDOM, BasePeriod.BEFORE_SLEEP -> onHasFoodChanged(false)
+            BasePeriod.FASTING, BasePeriod.RANDOM, BasePeriod.BEFORE_SLEEP,
+            BasePeriod.BEFORE_EXERCISE, BasePeriod.AFTER_EXERCISE -> onHasFoodChanged(false)
             BasePeriod.AFTER_MEAL -> { /* retain current food selection */ }
         }
         updateActualPeriod()
@@ -170,6 +175,8 @@ class EntryViewModel(
         period = when (basePeriod) {
             BasePeriod.FASTING -> Period.FASTING
             BasePeriod.BEFORE_SLEEP -> Period.BEFORE_SLEEP
+            BasePeriod.BEFORE_EXERCISE -> Period.BEFORE_EXERCISE
+            BasePeriod.AFTER_EXERCISE -> Period.AFTER_EXERCISE
             BasePeriod.RANDOM -> Period.RANDOM
             BasePeriod.BEFORE_MEAL -> when (mealType) {
                 MealType.BREAKFAST -> Period.BEFORE_BREAKFAST

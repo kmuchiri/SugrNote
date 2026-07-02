@@ -33,8 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.sugrnote.data.settings.DarkThemeStyle
 import com.example.sugrnote.data.settings.ThemeMode
+import com.example.sugrnote.ui.overview.MyCustomFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,11 +61,18 @@ fun YouScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("You") },
+                title = { 
+                    Text(
+                        "You",
+                        fontFamily = MyCustomFontFamily,
+                        fontSize = 24.sp
+                    ) 
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                windowInsets = WindowInsets(0.dp)
             )
         },
         contentWindowInsets = WindowInsets(0.dp)

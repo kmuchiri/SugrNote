@@ -24,6 +24,21 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
+enum class BasePeriod(val displayLabel: String) {
+    FASTING("Fasting"),
+    BEFORE_MEAL("Before Meal"),
+    AFTER_MEAL("After Meal"),
+    BEFORE_SLEEP("Before Sleep"),
+    RANDOM("Random")
+}
+
+enum class MealType(val displayLabel: String) {
+    BREAKFAST("Breakfast"),
+    LUNCH("Lunch"),
+    DINNER("Dinner"),
+    SNACK("Snack")
+}
+
 class EntryViewModel(
     private val repository: GlucoseRepository,
     settingsRepository: SettingsRepository,
@@ -43,6 +58,10 @@ class EntryViewModel(
     var glucoseValueText by mutableStateOf("")
         private set
     var period by mutableStateOf(Period.RANDOM)
+        private set
+    var basePeriod by mutableStateOf(BasePeriod.RANDOM)
+        private set
+    var mealType by mutableStateOf(MealType.BREAKFAST)
         private set
     var insulinType by mutableStateOf(InsulinType.NONE)
         private set
@@ -101,6 +120,21 @@ class EntryViewModel(
                 }
 
                 period = entry.period
+                basePeriod = when (period) {
+                    Period.FASTING -> BasePeriod.FASTING
+                    Period.BEFORE_BREAKFAST, Period.BEFORE_LUNCH, Period.BEFORE_DINNER, Period.BEFORE_SNACK -> BasePeriod.BEFORE_MEAL
+                    Period.AFTER_BREAKFAST, Period.AFTER_LUNCH, Period.AFTER_DINNER, Period.AFTER_SNACK -> BasePeriod.AFTER_MEAL
+                    Period.BEFORE_SLEEP -> BasePeriod.BEFORE_SLEEP
+                    Period.RANDOM -> BasePeriod.RANDOM
+                }
+                mealType = when (period) {
+                    Period.BEFORE_BREAKFAST, Period.AFTER_BREAKFAST -> MealType.BREAKFAST
+                    Period.BEFORE_LUNCH, Period.AFTER_LUNCH -> MealType.LUNCH
+                    Period.BEFORE_DINNER, Period.AFTER_DINNER -> MealType.DINNER
+                    Period.BEFORE_SNACK, Period.AFTER_SNACK -> MealType.SNACK
+                    else -> MealType.BREAKFAST
+                }
+                
                 insulinType = entry.insulinType
                 longActingUnitsText = entry.longActingUnits?.toString() ?: ""
                 shortActingUnitsText = entry.shortActingUnits?.toString() ?: ""
@@ -116,6 +150,42 @@ class EntryViewModel(
         glucoseValueText = text
         glucoseError = null
     }
+
+    fun onBasePeriodChanged(newPeriod: BasePeriod) {
+        basePeriod = newPeriod
+        when (newPeriod) {
+            BasePeriod.BEFORE_MEAL -> onHasFoodChanged(true)
+            BasePeriod.FASTING, BasePeriod.RANDOM, BasePeriod.BEFORE_SLEEP -> onHasFoodChanged(false)
+            BasePeriod.AFTER_MEAL -> { /* retain current food selection */ }
+        }
+        updateActualPeriod()
+    }
+
+    fun onMealTypeChanged(newMealType: MealType) {
+        mealType = newMealType
+        updateActualPeriod()
+    }
+
+    private fun updateActualPeriod() {
+        period = when (basePeriod) {
+            BasePeriod.FASTING -> Period.FASTING
+            BasePeriod.BEFORE_SLEEP -> Period.BEFORE_SLEEP
+            BasePeriod.RANDOM -> Period.RANDOM
+            BasePeriod.BEFORE_MEAL -> when (mealType) {
+                MealType.BREAKFAST -> Period.BEFORE_BREAKFAST
+                MealType.LUNCH -> Period.BEFORE_LUNCH
+                MealType.DINNER -> Period.BEFORE_DINNER
+                MealType.SNACK -> Period.BEFORE_SNACK
+            }
+            BasePeriod.AFTER_MEAL -> when (mealType) {
+                MealType.BREAKFAST -> Period.AFTER_BREAKFAST
+                MealType.LUNCH -> Period.AFTER_LUNCH
+                MealType.DINNER -> Period.AFTER_DINNER
+                MealType.SNACK -> Period.AFTER_SNACK
+            }
+        }
+    }
+
     fun onPeriodChanged(newPeriod: Period) { period = newPeriod }
     fun onInsulinTypeChanged(newType: InsulinType) {
         insulinType = newType

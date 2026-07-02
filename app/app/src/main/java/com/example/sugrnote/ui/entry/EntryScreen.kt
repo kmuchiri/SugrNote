@@ -186,33 +186,42 @@ fun EntryScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Date field
-            Text("Date", style = MaterialTheme.typography.labelLarge)
-            OutlinedTextField(
-                value = DateTimeUtils.formatDate(viewModel.date, prefs),
-                onValueChange = {},
-                readOnly = true,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.CalendarToday, "Select date")
-                    }
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Date", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = DateTimeUtils.formatDate(viewModel.date, prefs),
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            IconButton(onClick = { showDatePicker = true }) {
+                                Icon(Icons.Default.CalendarToday, "Select date")
+                            }
+                        }
+                    )
                 }
-            )
 
-            // Time field
-            Text("Time", style = MaterialTheme.typography.labelLarge)
-            OutlinedTextField(
-                value = DateTimeUtils.formatTime(viewModel.time, prefs),
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(onClick = { showTimePicker = true }) {
-                        Icon(Icons.Default.Schedule, "Select time")
-                    }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Time", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(
+                        value = DateTimeUtils.formatTime(viewModel.time, prefs),
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            IconButton(onClick = { showTimePicker = true }) {
+                                Icon(Icons.Default.Schedule, "Select time")
+                            }
+                        }
+                    )
                 }
-            )
+            }
 
             // Glucose value
             Text(
@@ -235,16 +244,43 @@ fun EntryScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Period.entries.forEach { p ->
+                BasePeriod.entries.forEach { p ->
                     FilterChip(
-                        selected = viewModel.period == p,
-                        onClick = { viewModel.onPeriodChanged(p) },
+                        selected = viewModel.basePeriod == p,
+                        onClick = { viewModel.onBasePeriodChanged(p) },
                         label = { Text(p.displayLabel) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primary,
                             selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                         )
                     )
+                }
+            }
+
+            // Meal Type (conditional)
+            AnimatedVisibility(
+                visible = viewModel.basePeriod == BasePeriod.BEFORE_MEAL ||
+                        viewModel.basePeriod == BasePeriod.AFTER_MEAL
+            ) {
+                Column {
+                    Text("Meal", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.height(4.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        MealType.entries.forEach { m ->
+                            FilterChip(
+                                selected = viewModel.mealType == m,
+                                onClick = { viewModel.onMealTypeChanged(m) },
+                                label = { Text(m.displayLabel) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                        }
+                    }
                 }
             }
 

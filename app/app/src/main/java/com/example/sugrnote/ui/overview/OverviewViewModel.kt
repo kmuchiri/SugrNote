@@ -45,7 +45,9 @@ enum class StatsPeriod(val label: String, val daysBack: Int) {
 }
 
 data class InsulinPeriodStats(
-    val dailyAverage: Float?
+    val dailyAverage: Float?,
+    val longActingAverage: Float?,
+    val shortActingAverage: Float?
 )
 
 class OverviewViewModel(
@@ -118,12 +120,14 @@ class OverviewViewModel(
             repository.observeEntriesSince(sinceMillis)
                 .map { entries ->
                     if (entries.isEmpty()) {
-                        InsulinPeriodStats(null)
+                        InsulinPeriodStats(null, null, null)
                     } else {
-                        val total = entries.sumOf { (it.longActingUnits?.toDouble() ?: 0.0) + (it.shortActingUnits?.toDouble() ?: 0.0) }.toFloat()
-                        InsulinPeriodStats(total / period.daysBack)
+                        val totalLong = entries.sumOf { (it.longActingUnits?.toDouble() ?: 0.0) }.toFloat()
+                        val totalShort = entries.sumOf { (it.shortActingUnits?.toDouble() ?: 0.0) }.toFloat()
+                        val total = totalLong + totalShort
+                        InsulinPeriodStats(total / period.daysBack, totalLong / period.daysBack, totalShort / period.daysBack)
                     }
                 }
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinPeriodStats(null))
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinPeriodStats(null, null, null))
         }
 }

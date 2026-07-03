@@ -293,6 +293,63 @@ fun EntryScreen(
                 }
             }
 
+            // Exercise Details (conditional)
+            AnimatedVisibility(
+                visible = viewModel.basePeriod == BasePeriod.BEFORE_EXERCISE
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1.5f)) {
+                        Text("Intensity", style = MaterialTheme.typography.labelLarge)
+                        Spacer(Modifier.height(4.dp))
+                        var expanded by remember { mutableStateOf(false) }
+                        androidx.compose.material3.ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = viewModel.exerciseIntensity,
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                singleLine = true
+                            )
+                            androidx.compose.material3.ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                listOf("Light", "Moderate", "Intense").forEach { selectionOption ->
+                                    androidx.compose.material3.DropdownMenuItem(
+                                        text = { Text(selectionOption) },
+                                        onClick = {
+                                            viewModel.onExerciseIntensityChanged(selectionOption)
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Duration (mins)", style = MaterialTheme.typography.labelLarge)
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = viewModel.exerciseDurationText,
+                            onValueChange = { viewModel.onExerciseDurationChanged(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = viewModel.exerciseDurationError != null,
+                            supportingText = viewModel.exerciseDurationError?.let { { Text(it) } },
+                            singleLine = true
+                        )
+                    }
+                }
+            }
+
             // Insulin type
             Text("Insulin", style = MaterialTheme.typography.labelLarge)
             FlowRow(

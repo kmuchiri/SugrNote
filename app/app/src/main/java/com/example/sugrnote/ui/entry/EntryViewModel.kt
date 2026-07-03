@@ -76,6 +76,11 @@ class EntryViewModel(
     var carbAmountText by mutableStateOf("")
         private set
 
+    var exerciseIntensity by mutableStateOf("Light")
+        private set
+    var exerciseDurationText by mutableStateOf("")
+        private set
+
     // Validation errors
     var glucoseError by mutableStateOf<String?>(null)
         private set
@@ -84,6 +89,8 @@ class EntryViewModel(
     var shortActingError by mutableStateOf<String?>(null)
         private set
     var carbError by mutableStateOf<String?>(null)
+        private set
+    var exerciseDurationError by mutableStateOf<String?>(null)
         private set
 
     var isSaved by mutableStateOf(false)
@@ -144,6 +151,8 @@ class EntryViewModel(
                 shortActingUnitsText = entry.shortActingUnits?.toString() ?: ""
                 hasFood = entry.hasFood
                 carbAmountText = entry.carbAmount?.toString() ?: ""
+                exerciseIntensity = entry.exerciseIntensity ?: "Light"
+                exerciseDurationText = entry.exerciseDuration?.toString() ?: ""
             }
         }
     }
@@ -225,6 +234,11 @@ class EntryViewModel(
         carbAmountText = text
         carbError = null
     }
+    fun onExerciseIntensityChanged(intensity: String) { exerciseIntensity = intensity }
+    fun onExerciseDurationChanged(text: String) {
+        exerciseDurationText = text
+        exerciseDurationError = null
+    }
 
     fun onDismissUnusualValueDialog() {
         showUnusualValueDialog = false
@@ -287,6 +301,18 @@ class EntryViewModel(
             }
         }
 
+        // Validate exercise
+        var duration: Int? = null
+        if (basePeriod == BasePeriod.BEFORE_EXERCISE) {
+            if (exerciseDurationText.isNotBlank()) {
+                duration = exerciseDurationText.toIntOrNull()
+                if (duration == null || duration <= 0) {
+                    exerciseDurationError = "Enter valid duration"
+                    return
+                }
+            }
+        }
+
         // Build dateTime
         val zonedDateTime = date.atTime(time).atZone(ZoneId.systemDefault())
         val epochMillis = zonedDateTime.toInstant().toEpochMilli()
@@ -301,6 +327,8 @@ class EntryViewModel(
             shortActingUnits = shortUnits,
             hasFood = hasFood,
             carbAmount = carbs,
+            exerciseIntensity = if (basePeriod == BasePeriod.BEFORE_EXERCISE) exerciseIntensity else null,
+            exerciseDuration = if (basePeriod == BasePeriod.BEFORE_EXERCISE) duration else null,
             sourceType = EntrySource.MANUAL
         )
 

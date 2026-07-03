@@ -665,6 +665,47 @@ fun OverviewScreen(
                                                 modifier = Modifier.padding(bottom = 6.dp)
                                             )
                                         }
+
+                                        Spacer(Modifier.height(12.dp))
+
+                                        val totalFloat = insulinStats.dailyAverage!!
+                                        val longAvg = insulinStats.longActingAverage ?: 0f
+                                        val shortAvg = insulinStats.shortActingAverage ?: 0f
+
+                                        val longWeight = if (totalFloat > 0f) longAvg / totalFloat else 0f
+                                        val shortWeight = if (totalFloat > 0f) shortAvg / totalFloat else 0f
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(12.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                        ) {
+                                            if (longWeight > 0f) {
+                                                Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
+                                            }
+                                            if (shortWeight > 0f) {
+                                                Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
+                                            }
+                                        }
+
+                                        Spacer(Modifier.height(12.dp))
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text("${formatInsulin(longAvg)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text("${formatInsulin(shortAvg)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
                                     } else {
                                         Text(
                                             "No data available",

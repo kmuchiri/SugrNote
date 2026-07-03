@@ -18,6 +18,8 @@ data class GlucoseEntry(
     val shortActingUnits: Float? = null,
     val hasFood: Boolean = false,
     val carbAmount: Float? = null,
+    val exerciseIntensity: String? = null,
+    val exerciseDuration: Int? = null,
     val sourceType: EntrySource = EntrySource.MANUAL,
     val imagePath: String? = null
 )

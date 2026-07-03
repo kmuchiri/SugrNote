@@ -51,12 +51,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.model.Period
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneOffset
 import com.example.sugrnote.domain.util.DateTimeUtils
+import com.example.sugrnote.ui.overview.MyCustomFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -148,17 +150,24 @@ fun EntryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Sugr Note") },
+                title = { 
+                    Text(
+                        "Edit Sugr Note",
+                        fontFamily = MyCustomFontFamily,
+                        fontSize = 20.sp
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                windowInsets = WindowInsets(0.dp)
             )
         },
         bottomBar = {
@@ -303,43 +312,45 @@ fun EntryScreen(
                 }
             }
 
-            // Long Acting units (conditional)
+            // Insulin units (conditional)
             AnimatedVisibility(
-                visible = viewModel.insulinType == InsulinType.LONG_ACTING ||
-                        viewModel.insulinType == InsulinType.BOTH
+                visible = viewModel.insulinType != InsulinType.NONE
             ) {
-                Column {
-                    Text("Long Acting units", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = viewModel.longActingUnitsText,
-                        onValueChange = { viewModel.onLongActingUnitsChanged(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        isError = viewModel.longActingError != null,
-                        supportingText = viewModel.longActingError?.let { { Text(it) } },
-                        singleLine = true
-                    )
-                }
-            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (viewModel.insulinType == InsulinType.LONG_ACTING || viewModel.insulinType == InsulinType.BOTH) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Long Acting units", style = MaterialTheme.typography.labelLarge)
+                            Spacer(Modifier.height(4.dp))
+                            OutlinedTextField(
+                                value = viewModel.longActingUnitsText,
+                                onValueChange = { viewModel.onLongActingUnitsChanged(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                isError = viewModel.longActingError != null,
+                                supportingText = viewModel.longActingError?.let { { Text(it) } },
+                                singleLine = true
+                            )
+                        }
+                    }
 
-            // Short Acting units (conditional)
-            AnimatedVisibility(
-                visible = viewModel.insulinType == InsulinType.SHORT_ACTING ||
-                        viewModel.insulinType == InsulinType.BOTH
-            ) {
-                Column {
-                    Text("Short Acting units", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = viewModel.shortActingUnitsText,
-                        onValueChange = { viewModel.onShortActingUnitsChanged(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        isError = viewModel.shortActingError != null,
-                        supportingText = viewModel.shortActingError?.let { { Text(it) } },
-                        singleLine = true
-                    )
+                    if (viewModel.insulinType == InsulinType.SHORT_ACTING || viewModel.insulinType == InsulinType.BOTH) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Short Acting units", style = MaterialTheme.typography.labelLarge)
+                            Spacer(Modifier.height(4.dp))
+                            OutlinedTextField(
+                                value = viewModel.shortActingUnitsText,
+                                onValueChange = { viewModel.onShortActingUnitsChanged(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                isError = viewModel.shortActingError != null,
+                                supportingText = viewModel.shortActingError?.let { { Text(it) } },
+                                singleLine = true
+                            )
+                        }
+                    }
                 }
             }
 

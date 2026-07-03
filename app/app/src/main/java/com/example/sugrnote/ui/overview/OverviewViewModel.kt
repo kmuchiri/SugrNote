@@ -44,6 +44,10 @@ enum class StatsPeriod(val label: String, val daysBack: Int) {
     DAYS_90("90 Day", 90);
 }
 
+data class InsulinPeriodStats(
+    val dailyAverage: Float?
+)
+
 class OverviewViewModel(
     repository: GlucoseRepository,
     settingsRepository: SettingsRepository
@@ -106,5 +110,20 @@ class OverviewViewModel(
                     PeriodStats(average, count, lowCount, inRangeCount, highCount, min, max)
                 }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PeriodStats(null, 0, 0, 0, 0, null, null))
+        }
+
+    val insulinPeriodStats: Map<StatsPeriod, StateFlow<InsulinPeriodStats>> =
+        StatsPeriod.entries.associateWith { period ->
+            val sinceMillis = System.currentTimeMillis() - period.daysBack * 24 * 60 * 60 * 1000L
+            repository.observeEntriesSince(sinceMillis)
+                .map { entries ->
+                    if (entries.isEmpty()) {
+                        InsulinPeriodStats(null)
+                    } else {
+                        val total = entries.sumOf { (it.longActingUnits?.toDouble() ?: 0.0) + (it.shortActingUnits?.toDouble() ?: 0.0) }.toFloat()
+                        InsulinPeriodStats(total / period.daysBack)
+                    }
+                }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinPeriodStats(null))
         }
 }

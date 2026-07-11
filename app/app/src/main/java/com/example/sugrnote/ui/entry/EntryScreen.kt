@@ -24,7 +24,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -305,7 +308,7 @@ fun EntryScreen(
                         Text("Intensity", style = MaterialTheme.typography.labelLarge)
                         Spacer(Modifier.height(4.dp))
                         var expanded by remember { mutableStateOf(false) }
-                        androidx.compose.material3.ExposedDropdownMenuBox(
+                        ExposedDropdownMenuBox(
                             expanded = expanded,
                             onExpandedChange = { expanded = it }
                         ) {
@@ -313,16 +316,16 @@ fun EntryScreen(
                                 value = viewModel.exerciseIntensity,
                                 onValueChange = {},
                                 readOnly = true,
-                                trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                                 modifier = Modifier.menuAnchor().fillMaxWidth(),
                                 singleLine = true
                             )
-                            androidx.compose.material3.ExposedDropdownMenu(
+                            ExposedDropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
                                 listOf("Light", "Moderate", "Intense").forEach { selectionOption ->
-                                    androidx.compose.material3.DropdownMenuItem(
+                                    DropdownMenuItem(
                                         text = { Text(selectionOption) },
                                         onClick = {
                                             viewModel.onExerciseIntensityChanged(selectionOption)

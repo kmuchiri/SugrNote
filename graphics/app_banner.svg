@@ -25,10 +25,10 @@
      inkscape:document-units="mm"
      showborder="true"
      borderlayer="false"
-     inkscape:zoom="0.36522465"
-     inkscape:cx="1047.3006"
-     inkscape:cy="1155.4532"
-     inkscape:window-width="1021"
+     inkscape:zoom="0.25825283"
+     inkscape:cx="1601.1441"
+     inkscape:cy="1440.4489"
+     inkscape:window-width="1908"
      inkscape:window-height="1014"
      inkscape:window-x="23"
      inkscape:window-y="15"
@@ -56,18 +56,18 @@
          x="303.08792"
          y="217.14906" /></text>
     <rect
-       style="fill:#840425;fill-opacity:1;stroke:none;stroke-width:0.185208"
+       style="fill:#840425;fill-opacity:1;stroke:none;stroke-width:0.18123"
        id="rect2"
-       width="265.19696"
+       width="253.92732"
        height="53.305923"
-       x="227.8828"
-       y="185.23805"
+       x="219.91396"
+       y="182.34029"
        rx="0.30000001"
        ry="0.30000001" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:42.3333px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:0.185208"
-       x="246.05428"
+       x="241.00197"
        y="221.62766"
        id="text2"
        inkscape:export-filename="sugrNotes-banner.png"
@@ -76,7 +76,7 @@
          sodipodi:role="line"
          id="tspan2"
          style="font-size:42.3333px;fill:#f2f2f2;fill-opacity:1;stroke-width:0.185208"
-         x="246.05428"
-         y="221.62766">sugrNotes</tspan></text>
+         x="241.00197"
+         y="221.62766">SugrNote</tspan></text>
   </g>
 </svg>

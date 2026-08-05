@@ -339,8 +339,12 @@ class EntryViewModel(
                 repository.insertEntry(entry)
             }
             
-            // Notify widget to update
-            com.example.sugrnote.widget.AddEntryWidgetProvider.sendUpdateBroadcast(applicationContext)
+            // Notify widget to update — must happen on Main thread and before
+            // isSaved triggers navigation, because the activity may be destroyed
+            // (e.g. when launched from widget shortcut with FLAG_ACTIVITY_CLEAR_TASK)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                com.example.sugrnote.widget.AddEntryWidgetProvider.sendUpdateBroadcast(applicationContext)
+            }
             
             isSaved = true
         }

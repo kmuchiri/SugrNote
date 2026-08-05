@@ -83,6 +83,10 @@ class MainActivity : ComponentActivity() {
                         } else {
                             GlucoseNotificationManager.cancel(this@MainActivity)
                         }
+                        // Keep widget in sync using the same reactive data
+                        com.example.sugrnote.widget.AddEntryWidgetProvider.updateWidgetDirectly(
+                            this@MainActivity, entry, prefs
+                        )
                     }
             }
         }

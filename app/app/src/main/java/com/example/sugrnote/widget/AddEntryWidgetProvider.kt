@@ -37,7 +37,7 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
             val prefs = settingsRepo.preferencesFlow.first()
 
             for (appWidgetId in appWidgetIds) {
-                updateAppWidget(context, appWidgetManager, appWidgetId, latestEntry, prefs)
+                updateSingleWidget(context, appWidgetManager, appWidgetId, latestEntry, prefs)
             }
         }
     }
@@ -45,16 +45,34 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_UPDATE_WIDGET) {
+            val pendingResult = goAsync()
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, AddEntryWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
             if (appWidgetIds.isNotEmpty()) {
-                onUpdate(context, appWidgetManager, appWidgetIds)
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val db = AppDatabase.getInstance(context.applicationContext)
+                        val glucoseRepo = GlucoseRepository(db.glucoseEntryDao())
+                        val settingsRepo = SettingsRepository(context.applicationContext)
+
+                        val latestEntry = glucoseRepo.getLatestEntry()
+                        val prefs = settingsRepo.preferencesFlow.first()
+
+                        for (appWidgetId in appWidgetIds) {
+                            updateSingleWidget(context, appWidgetManager, appWidgetId, latestEntry, prefs)
+                        }
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+            } else {
+                pendingResult.finish()
             }
         }
     }
 
-    private fun updateAppWidget(
+    private fun updateSingleWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
@@ -128,6 +146,81 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
                 action = ACTION_UPDATE_WIDGET
             }
             context.sendBroadcast(intent)
+        }
+
+        /**
+         * Update all widget instances directly with the provided data.
+         * Called from MainActivity's reactive Flow observer so the widget
+         * updates at the exact same time as the notification.
+         */
+        fun updateWidgetDirectly(
+            context: Context,
+            latestEntry: com.example.sugrnote.data.local.GlucoseEntry?,
+            prefs: com.example.sugrnote.data.settings.UserPreferences
+        ) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val componentName = ComponentName(context, AddEntryWidgetProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+            for (appWidgetId in appWidgetIds) {
+                performWidgetUpdate(context, appWidgetManager, appWidgetId, latestEntry, prefs)
+            }
+        }
+
+        private fun performWidgetUpdate(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            latestEntry: com.example.sugrnote.data.local.GlucoseEntry?,
+            prefs: com.example.sugrnote.data.settings.UserPreferences
+        ) {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                action = "com.example.sugrnote.ACTION_ADD_ENTRY"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val views = RemoteViews(context.packageName, R.layout.widget_add_entry)
+            views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+
+            if (latestEntry != null) {
+                val status = GlucoseStatus.fromValue(
+                    latestEntry.glucoseMgDl,
+                    prefs.lowThresholdMgDl,
+                    prefs.highThresholdMgDl
+                )
+
+                val bgColor = when (status) {
+                    GlucoseStatus.LOW -> android.graphics.Color.parseColor("#E53935")
+                    GlucoseStatus.IN_RANGE -> android.graphics.Color.parseColor("#43A047")
+                    GlucoseStatus.HIGH -> android.graphics.Color.parseColor("#FF8F00")
+                }
+
+                val formattedValue = GlucoseUnitConverter.format(latestEntry.glucoseMgDl, prefs.glucoseUnit)
+
+                views.setTextViewText(R.id.widget_text_reading, formattedValue)
+                views.setTextViewText(R.id.widget_text_unit, prefs.glucoseUnit.displayLabel)
+                views.setTextViewText(R.id.widget_text_period, latestEntry.period.displayLabel)
+
+                val instant = java.time.Instant.ofEpochMilli(latestEntry.dateTime)
+                val zoned = instant.atZone(java.time.ZoneId.systemDefault())
+                views.setTextViewText(R.id.widget_text_time, com.example.sugrnote.domain.util.DateTimeUtils.formatDateTime(zoned, prefs))
+
+                views.setInt(R.id.widget_container, "setBackgroundColor", bgColor)
+            } else {
+                views.setTextViewText(R.id.widget_text_reading, "--")
+                views.setTextViewText(R.id.widget_text_unit, "")
+                views.setTextViewText(R.id.widget_text_period, "")
+                views.setTextViewText(R.id.widget_text_time, "")
+                views.setInt(R.id.widget_container, "setBackgroundColor", android.graphics.Color.parseColor("#1A73E8"))
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 }

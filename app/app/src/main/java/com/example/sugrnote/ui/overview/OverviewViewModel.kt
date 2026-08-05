@@ -35,11 +35,11 @@ data class InsulinStats24h(
 )
 
 /**
- * Defines the time periods available in the averages carousel.
+ * Defines the time periods available for glucose averages.
  */
 enum class StatsPeriod(val label: String, val daysBack: Int) {
     DAYS_7("7D", 7),
-    DAYS_14("14", 14),
+    DAYS_14("14D", 14),
     DAYS_30("30D", 30),
     DAYS_60("60D", 60),
     DAYS_90("90D", 90);

@@ -90,7 +90,7 @@ fun OverviewScreen(
     val context = LocalContext.current
 
     val periods = StatsPeriod.entries
-    val pagerState = rememberPagerState(pageCount = { periods.size })
+    var selectedGlucosePeriod by remember { mutableStateOf(StatsPeriod.DAYS_7) }
 
     val isDarkTheme = isSystemInDarkTheme()
     val shadowColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f) else DefaultShadowColor
@@ -295,7 +295,7 @@ fun OverviewScreen(
                 }
             }
 
-            // Averages carousel
+            // Glucose Averages
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -309,158 +309,148 @@ fun OverviewScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-                Column {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { page ->
-                        val period = periods[page]
-                        val stats by viewModel.periodStats[period]!!.collectAsState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Text(
+                        "Glucose Averages",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            Text(
-                                "${period.label} Average",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    // Time Period Filter Chips
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        periods.forEach { period ->
+                            androidx.compose.material3.FilterChip(
+                                selected = selectedGlucosePeriod == period,
+                                onClick = { selectedGlucosePeriod = period },
+                                label = { Text(period.label) },
+                                colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
-                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
 
-                            if (stats.average != null) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(verticalAlignment = Alignment.Bottom) {
-                                        Text(
-                                            GlucoseUnitConverter.format(
-                                                stats.average!!,
-                                                prefs.glucoseUnit
-                                            ),
-                                            style = MaterialTheme.typography.displayLarge
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            prefs.glucoseUnit.displayLabel,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(bottom = 8.dp)
-                                        )
-                                    }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text(
-                                            stats.count.toString(),
-                                            style = MaterialTheme.typography.headlineMedium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            "Reading(s)",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                                
-                                Spacer(Modifier.height(16.dp))
-                                
-                                val total = stats.count.toFloat()
-                                val lowWeight = if (total > 0) stats.lowCount / total else 0f
-                                val inRangeWeight = if (total > 0) stats.inRangeCount / total else 0f
-                                val highWeight = if (total > 0) stats.highCount / total else 0f
+                    Spacer(Modifier.height(16.dp))
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(12.dp)
-                                        .clip(RoundedCornerShape(6.dp))
-                                ) {
-                                    if (lowWeight > 0f) {
-                                        Box(modifier = Modifier.weight(lowWeight).fillMaxHeight().background(StatusLow))
-                                    }
-                                    if (inRangeWeight > 0f) {
-                                        Box(modifier = Modifier.weight(inRangeWeight).fillMaxHeight().background(StatusInRange))
-                                    }
-                                    if (highWeight > 0f) {
-                                        Box(modifier = Modifier.weight(highWeight).fillMaxHeight().background(StatusHigh))
-                                    }
-                                }
+                    val stats by viewModel.periodStats[selectedGlucosePeriod]!!.collectAsState()
 
-                                Spacer(Modifier.height(16.dp))
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    // Status breakdown
-                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(stats.lowCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusLow)
-                                            Text("Low", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(stats.inRangeCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusInRange)
-                                            Text("Target", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(stats.highCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusHigh)
-                                            Text("High", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-
-                                    // Min/Max breakdown
-                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(
-                                                stats.min?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text("Lowest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(
-                                                stats.max?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text("Highest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-                                }
-                            } else {
+                    if (stats.average != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
-                                    "No data available",
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    GlucoseUnitConverter.format(
+                                        stats.average!!,
+                                        prefs.glucoseUnit
+                                    ),
+                                    style = MaterialTheme.typography.displayLarge
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    prefs.glucoseUnit.displayLabel,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    stats.count.toString(),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Reading(s)",
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
-                    }
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        val total = stats.count.toFloat()
+                        val lowWeight = if (total > 0) stats.lowCount / total else 0f
+                        val inRangeWeight = if (total > 0) stats.inRangeCount / total else 0f
+                        val highWeight = if (total > 0) stats.highCount / total else 0f
 
-                    // Page indicators
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        periods.forEachIndexed { index, _ ->
-                            val isSelected = pagerState.currentPage == index
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .size(if (isSelected) 8.dp else 6.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outlineVariant
-                                    )
-                            )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                        ) {
+                            if (lowWeight > 0f) {
+                                Box(modifier = Modifier.weight(lowWeight).fillMaxHeight().background(StatusLow))
+                            }
+                            if (inRangeWeight > 0f) {
+                                Box(modifier = Modifier.weight(inRangeWeight).fillMaxHeight().background(StatusInRange))
+                            }
+                            if (highWeight > 0f) {
+                                Box(modifier = Modifier.weight(highWeight).fillMaxHeight().background(StatusHigh))
+                            }
                         }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Status breakdown
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(stats.lowCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusLow)
+                                    Text("Low", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(stats.inRangeCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusInRange)
+                                    Text("Target", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(stats.highCount.toString(), style = MaterialTheme.typography.titleMedium, color = StatusHigh)
+                                    Text("High", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+
+                            // Min/Max breakdown
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        stats.min?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text("Lowest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        stats.max?.let { GlucoseUnitConverter.format(it, prefs.glucoseUnit) } ?: "-",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text("Highest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            "No data available",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -738,43 +728,6 @@ fun OverviewScreen(
                             }
                         }
                     }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = false
-                ) {
-                    Icon(
-                        Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("From Image")
-                }
-
-                FilledTonalButton(
-                    onClick = onAddEntry,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Manual Record")
                 }
             }
         }

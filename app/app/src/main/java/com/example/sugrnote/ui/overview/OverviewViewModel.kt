@@ -38,10 +38,11 @@ data class InsulinStats24h(
  * Defines the time periods available in the averages carousel.
  */
 enum class StatsPeriod(val label: String, val daysBack: Int) {
-    DAYS_7("7 Day", 7),
-    DAYS_14("14 Day", 14),
-    DAYS_30("30 Day", 30),
-    DAYS_90("90 Day", 90);
+    DAYS_7("7D", 7),
+    DAYS_14("14", 14),
+    DAYS_30("30D", 30),
+    DAYS_60("60D", 60),
+    DAYS_90("90D", 90);
 }
 
 data class InsulinPeriodStats(

@@ -10,6 +10,8 @@ class GlucoseRepository(private val dao: GlucoseEntryDao) {
 
     fun observeLatestEntry(): Flow<GlucoseEntry?> = dao.observeLatest()
 
+    suspend fun getLatestEntry(): GlucoseEntry? = dao.getLatest()
+
     fun observeAverageSince(sinceMillis: Long): Flow<Float?> = dao.observeAverageSince(sinceMillis)
 
     fun observeCountSince(sinceMillis: Long): Flow<Int> = dao.observeCountSince(sinceMillis)

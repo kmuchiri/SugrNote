@@ -33,7 +33,7 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
             val glucoseRepo = GlucoseRepository(db.glucoseEntryDao())
             val settingsRepo = SettingsRepository(context.applicationContext)
 
-            val latestEntry = glucoseRepo.observeLatestEntry().first()
+            val latestEntry = glucoseRepo.getLatestEntry()
             val prefs = settingsRepo.preferencesFlow.first()
 
             for (appWidgetId in appWidgetIds) {

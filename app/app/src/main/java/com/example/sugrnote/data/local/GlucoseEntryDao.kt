@@ -27,6 +27,9 @@ interface GlucoseEntryDao {
     @Query("SELECT * FROM glucose_entries ORDER BY dateTime DESC LIMIT 1")
     fun observeLatest(): Flow<GlucoseEntry?>
 
+    @Query("SELECT * FROM glucose_entries ORDER BY dateTime DESC LIMIT 1")
+    suspend fun getLatest(): GlucoseEntry?
+
     @Query("SELECT AVG(glucoseMgDl) FROM glucose_entries WHERE dateTime >= :sinceMillis")
     fun observeAverageSince(sinceMillis: Long): Flow<Float?>
 

@@ -21,6 +21,7 @@ enum class TimeRange(val display: String, val days: Int) {
     DAYS_7("7D", 7),
     DAYS_14("14D", 14),
     DAYS_30("30D", 30),
+    DAYS_60("60D",60),
     DAYS_90("90D", 90)
 }
 

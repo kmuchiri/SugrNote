@@ -458,7 +458,6 @@ fun OverviewScreen(
             Spacer(Modifier.height(8.dp))
 
             if (latestLongActingEntry != null || latestShortActingEntry != null || insulinStats24h.total > 0f) {
-                val insulinPagerState = rememberPagerState(pageCount = { 2 })
                 var selectedInsulinPeriod by remember { mutableStateOf(StatsPeriod.DAYS_7) }
 
                 Card(
@@ -474,264 +473,110 @@ fun OverviewScreen(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
-                    Column {
-                        HorizontalPager(
-                            state = insulinPagerState,
-                            modifier = Modifier.fillMaxWidth()
-                        ) { page ->
-                            if (page == 0) {
-                                Column(
-                                    modifier = Modifier.padding(20.dp)
-                                ) {
-                                    Text(
-                                        "Latest Insulin Dose",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(12.dp))
-                                    
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text("Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            Spacer(Modifier.height(4.dp))
-                                            if (latestLongActingEntry != null) {
-                                                val entry = latestLongActingEntry!!
-                                                Text(
-                                                    "${entry.longActingUnits}u",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                val instant = Instant.ofEpochMilli(entry.dateTime)
-                                                val zoned = instant.atZone(ZoneId.systemDefault())
-                                                Text(
-                                                    DateTimeUtils.formatTime(zoned, prefs),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            } else {
-                                                Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                                            }
-                                        }
-                                        
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text("Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            Spacer(Modifier.height(4.dp))
-                                            if (latestShortActingEntry != null) {
-                                                val entry = latestShortActingEntry!!
-                                                Text(
-                                                    "${entry.shortActingUnits}u",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                val instant = Instant.ofEpochMilli(entry.dateTime)
-                                                val zoned = instant.atZone(ZoneId.systemDefault())
-                                                Text(
-                                                    DateTimeUtils.formatTime(zoned, prefs),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            } else {
-                                                Text("-", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                                            }
-                                        }
-                                    }
-
-                                    if (insulinStats24h.total > 0f) {
-                                        val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else value.toString() }
-                                        Spacer(Modifier.height(12.dp))
-                                        
-                                        Text(
-                                            "Last 24 Hours",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(Modifier.height(12.dp))
-                                        
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.Bottom
-                                        ) {
-                                            Text(
-                                                "${formatInsulin(insulinStats24h.total)}u",
-                                                style = MaterialTheme.typography.titleLarge,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text(
-                                                "Total",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.padding(bottom = 6.dp)
-                                            )
-                                        }
-                                        
-                                        Spacer(Modifier.height(12.dp))
-                                        
-                                        val totalFloat = insulinStats24h.total
-                                        val longWeight = if (totalFloat > 0f) insulinStats24h.longActing / totalFloat else 0f
-                                        val shortWeight = if (totalFloat > 0f) insulinStats24h.shortActing / totalFloat else 0f
-                                        
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(12.dp)
-                                                .clip(RoundedCornerShape(6.dp))
-                                        ) {
-                                            if (longWeight > 0f) {
-                                                Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
-                                            }
-                                            if (shortWeight > 0f) {
-                                                Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
-                                            }
-                                        }
-                                        
-                                        Spacer(Modifier.height(12.dp))
-                                        
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text("${formatInsulin(insulinStats24h.longActing)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            }
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text("${formatInsulin(insulinStats24h.shortActing)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                Column(modifier = Modifier.padding(20.dp)) {
-                                    Text(
-                                        "Average Total Insulin",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(12.dp))
-                                    
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceEvenly
-                                    ) {
-                                        StatsPeriod.entries.forEach { period ->
-                                            androidx.compose.material3.FilterChip(
-                                                selected = selectedInsulinPeriod == period,
-                                                onClick = { selectedInsulinPeriod = period },
-                                                label = { Text(period.label) },
-                                                colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                                                )
-                                            )
-                                        }
-                                    }
-                                    
-                                    Spacer(Modifier.height(16.dp))
-                                    
-                                    val insulinStats by viewModel.insulinPeriodStats[selectedInsulinPeriod]!!.collectAsState()
-                                    if (insulinStats.dailyAverage != null) {
-                                        val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else String.format("%.1f", value) }
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.Bottom
-                                        ) {
-                                            Text(
-                                                "${formatInsulin(insulinStats.dailyAverage!!)}u",
-                                                style = MaterialTheme.typography.displayLarge,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Column(horizontalAlignment = Alignment.End) {
-                                                Text(
-                                                    insulinStats.injectionsCount.toString(),
-                                                    style = MaterialTheme.typography.headlineMedium,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                                Text(
-                                                    "Injection(s)",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-
-                                        Spacer(Modifier.height(12.dp))
-
-                                        val totalFloat = insulinStats.dailyAverage!!
-                                        val longAvg = insulinStats.longActingAverage ?: 0f
-                                        val shortAvg = insulinStats.shortActingAverage ?: 0f
-
-                                        val longWeight = if (totalFloat > 0f) longAvg / totalFloat else 0f
-                                        val shortWeight = if (totalFloat > 0f) shortAvg / totalFloat else 0f
-
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(12.dp)
-                                                .clip(RoundedCornerShape(6.dp))
-                                        ) {
-                                            if (longWeight > 0f) {
-                                                Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
-                                            }
-                                            if (shortWeight > 0f) {
-                                                Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
-                                            }
-                                        }
-
-                                        Spacer(Modifier.height(12.dp))
-
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text("${formatInsulin(longAvg)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            }
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
-                                                Spacer(Modifier.width(6.dp))
-                                                Text("${formatInsulin(shortAvg)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            }
-                                        }
-                                    } else {
-                                        Text(
-                                            "No data available",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            "Average Total Insulin",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp),
-                            horizontalArrangement = Arrangement.Center
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            for (index in 0..1) {
-                                val isSelected = insulinPagerState.currentPage == index
-                                Box(
-                                    modifier = Modifier
-                                        .padding(horizontal = 4.dp)
-                                        .size(if (isSelected) 8.dp else 6.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (isSelected) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.outlineVariant
-                                        )
+                            StatsPeriod.entries.forEach { period ->
+                                androidx.compose.material3.FilterChip(
+                                    selected = selectedInsulinPeriod == period,
+                                    onClick = { selectedInsulinPeriod = period },
+                                    label = { Text(period.label) },
+                                    colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                    )
                                 )
                             }
+                        }
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        val insulinStats by viewModel.insulinPeriodStats[selectedInsulinPeriod]!!.collectAsState()
+                        if (insulinStats.dailyAverage != null) {
+                            val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else String.format("%.1f", value) }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Text(
+                                    "${formatInsulin(insulinStats.dailyAverage!!)}u",
+                                    style = MaterialTheme.typography.displayLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        insulinStats.injectionsCount.toString(),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        "Injection(s)",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            Spacer(Modifier.height(12.dp))
+
+                            val totalFloat = insulinStats.dailyAverage!!
+                            val longAvg = insulinStats.longActingAverage ?: 0f
+                            val shortAvg = insulinStats.shortActingAverage ?: 0f
+
+                            val longWeight = if (totalFloat > 0f) longAvg / totalFloat else 0f
+                            val shortWeight = if (totalFloat > 0f) shortAvg / totalFloat else 0f
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(12.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                            ) {
+                                if (longWeight > 0f) {
+                                    Box(modifier = Modifier.weight(longWeight).fillMaxHeight().background(Color(0xFF9C27B0)))
+                                }
+                                if (shortWeight > 0f) {
+                                    Box(modifier = Modifier.weight(shortWeight).fillMaxHeight().background(Color(0xFF2196F3)))
+                                }
+                            }
+
+                            Spacer(Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("${formatInsulin(longAvg)}u Long Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("${formatInsulin(shortAvg)}u Short Acting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        } else {
+                            Text(
+                                "No data available",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }

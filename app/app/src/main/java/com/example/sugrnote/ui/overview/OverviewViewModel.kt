@@ -52,6 +52,14 @@ data class InsulinPeriodStats(
     val injectionsCount: Int
 )
 
+data class MealTimeStats(
+    val fastingAverage: Float?,
+    val beforeMealAverage: Float?,
+    val afterMealAverage: Float?,
+    val beforeSleepAverage: Float?,
+    val randomAverage: Float?
+)
+
 class OverviewViewModel(
     repository: GlucoseRepository,
     settingsRepository: SettingsRepository
@@ -132,5 +140,41 @@ class OverviewViewModel(
                     }
                 }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinPeriodStats(null, null, null, 0))
+        }
+
+    val mealTimePeriodStats: Map<StatsPeriod, StateFlow<MealTimeStats>> =
+        StatsPeriod.entries.associateWith { period ->
+            val sinceMillis = System.currentTimeMillis() - period.daysBack * 24 * 60 * 60 * 1000L
+            repository.observeEntriesSince(sinceMillis)
+                .map { entries ->
+                    if (entries.isEmpty()) {
+                        MealTimeStats(null, null, null, null, null)
+                    } else {
+                        val fastingEntries = entries.filter { it.period == com.example.sugrnote.domain.model.Period.FASTING }
+                        val beforeMealEntries = entries.filter { 
+                            it.period == com.example.sugrnote.domain.model.Period.BEFORE_BREAKFAST || 
+                            it.period == com.example.sugrnote.domain.model.Period.BEFORE_LUNCH || 
+                            it.period == com.example.sugrnote.domain.model.Period.BEFORE_DINNER ||
+                            it.period == com.example.sugrnote.domain.model.Period.BEFORE_SNACK
+                        }
+                        val afterMealEntries = entries.filter { 
+                            it.period == com.example.sugrnote.domain.model.Period.AFTER_BREAKFAST || 
+                            it.period == com.example.sugrnote.domain.model.Period.AFTER_LUNCH || 
+                            it.period == com.example.sugrnote.domain.model.Period.AFTER_DINNER ||
+                            it.period == com.example.sugrnote.domain.model.Period.AFTER_SNACK
+                        }
+                        val beforeSleepEntries = entries.filter { it.period == com.example.sugrnote.domain.model.Period.BEFORE_SLEEP }
+                        val randomEntries = entries.filter { it.period == com.example.sugrnote.domain.model.Period.RANDOM }
+
+                        val fastingAverage = if (fastingEntries.isNotEmpty()) fastingEntries.map { it.glucoseMgDl }.average().toFloat() else null
+                        val beforeMealAverage = if (beforeMealEntries.isNotEmpty()) beforeMealEntries.map { it.glucoseMgDl }.average().toFloat() else null
+                        val afterMealAverage = if (afterMealEntries.isNotEmpty()) afterMealEntries.map { it.glucoseMgDl }.average().toFloat() else null
+                        val beforeSleepAverage = if (beforeSleepEntries.isNotEmpty()) beforeSleepEntries.map { it.glucoseMgDl }.average().toFloat() else null
+                        val randomAverage = if (randomEntries.isNotEmpty()) randomEntries.map { it.glucoseMgDl }.average().toFloat() else null
+
+                        MealTimeStats(fastingAverage, beforeMealAverage, afterMealAverage, beforeSleepAverage, randomAverage)
+                    }
+                }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MealTimeStats(null, null, null, null, null))
         }
 }

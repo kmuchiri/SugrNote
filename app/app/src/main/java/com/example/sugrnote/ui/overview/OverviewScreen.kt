@@ -648,12 +648,18 @@ fun OverviewScreen(
                                                 style = MaterialTheme.typography.displayLarge,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
-                                            Text(
-                                                "Daily Avg",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.padding(bottom = 6.dp)
-                                            )
+                                            Column(horizontalAlignment = Alignment.End) {
+                                                Text(
+                                                    insulinStats.injectionsCount.toString(),
+                                                    style = MaterialTheme.typography.headlineMedium,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    "Injection(s)",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
                                         }
 
                                         Spacer(Modifier.height(12.dp))

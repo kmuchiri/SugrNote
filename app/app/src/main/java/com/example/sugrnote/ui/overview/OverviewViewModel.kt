@@ -135,7 +135,7 @@ class OverviewViewModel(
                         val totalLong = entries.sumOf { (it.longActingUnits?.toDouble() ?: 0.0) }.toFloat()
                         val totalShort = entries.sumOf { (it.shortActingUnits?.toDouble() ?: 0.0) }.toFloat()
                         val total = totalLong + totalShort
-                        val injectionsCount = entries.count { it.longActingUnits != null || it.shortActingUnits != null }
+                        val injectionsCount = entries.count { it.longActingUnits != null } + entries.count { it.shortActingUnits != null }
                         InsulinPeriodStats(total / period.daysBack, totalLong / period.daysBack, totalShort / period.daysBack, injectionsCount)
                     }
                 }

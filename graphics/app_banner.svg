@@ -25,58 +25,103 @@
      inkscape:document-units="mm"
      showborder="true"
      borderlayer="false"
-     inkscape:zoom="0.25825283"
-     inkscape:cx="1601.1441"
-     inkscape:cy="1440.4489"
+     inkscape:zoom="0.35968189"
+     inkscape:cx="2074.0549"
+     inkscape:cy="1173.259"
      inkscape:window-width="1908"
      inkscape:window-height="1014"
      inkscape:window-x="23"
      inkscape:window-y="15"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer2" />
   <defs
      id="defs1" />
   <g
-     inkscape:label="Layer 1"
+     inkscape:label="Light"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
-       id="rect1"
-       style="fill:#840425;stroke-width:0.594623;stroke:none;fill-opacity:1"
-       d="M 101.40415 73.835803 L 101.40415 359.5858 L 609.40415 359.5858 L 609.40415 73.835803 L 101.40415 73.835803 z M 109.54163 81.773303 L 601.26666 81.773303 C 601.37746 81.773303 601.46665 81.862491 601.46665 81.973291 L 601.46665 351.44832 C 601.46665 351.55912 601.37746 351.6483 601.26666 351.6483 L 109.54163 351.6483 C 109.43083 351.6483 109.34165 351.55912 109.34165 351.44832 L 109.34165 81.973291 C 109.34165 81.862491 109.43083 81.773303 109.54163 81.773303 z " />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:22.5778px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.185208"
-       x="303.08792"
-       y="217.14906"
-       id="text1"><tspan
-         sodipodi:role="line"
-         id="tspan1"
-         style="stroke-width:0.185208;fill:#000000"
-         x="303.08792"
-         y="217.14906" /></text>
-    <rect
-       style="fill:#840425;fill-opacity:1;stroke:none;stroke-width:0.18123"
-       id="rect2"
-       width="253.92732"
-       height="53.305923"
-       x="219.91396"
-       y="182.34029"
-       rx="0.30000001"
-       ry="0.30000001" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:42.3333px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:0.185208"
-       x="241.00197"
-       y="221.62766"
-       id="text2"
-       inkscape:export-filename="sugrNotes-banner.png"
-       inkscape:export-xdpi="96"
-       inkscape:export-ydpi="96"><tspan
-         sodipodi:role="line"
-         id="tspan2"
-         style="font-size:42.3333px;fill:#f2f2f2;fill-opacity:1;stroke-width:0.185208"
-         x="241.00197"
-         y="221.62766">SugrNote</tspan></text>
+    <g
+       id="g4"
+       transform="matrix(0.44444445,0,0,0.44444445,337.33626,33.663852)"
+       inkscape:export-filename="light-cover.png"
+       inkscape:export-xdpi="216"
+       inkscape:export-ydpi="216">
+      <path
+         id="rect1"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.594623"
+         d="M 101.40415,73.835803 V 359.5858 h 508 V 73.835803 Z m 8.13748,7.9375 h 491.72503 c 0.1108,0 0.19999,0.08919 0.19999,0.199988 V 351.44832 c 0,0.1108 -0.0892,0.19998 -0.19999,0.19998 H 109.54163 c -0.1108,0 -0.19998,-0.0892 -0.19998,-0.19998 V 81.973291 c 0,-0.1108 0.0892,-0.199988 0.19998,-0.199988 z" />
+      <g
+         id="g3"
+         transform="translate(29.142091)">
+        <path
+           id="path1-9-1-0-26"
+           style="fill:#1a1a1a;stroke-width:0.876089"
+           inkscape:label="solidDrop"
+           d="m 376.02467,192.58891 -0.76895,1.78181 c -1.12685,2.6108 -3.93738,6.8536 -7.99486,12.06954 -6.46045,8.305 -8.10796,11.36408 -8.31422,15.43627 -0.10117,1.99734 -0.0338,2.58896 0.42891,3.75688 1.76083,4.44416 7.04019,7.917 13.3687,8.79378 2.13539,0.29585 6.386,0.0914 8.50335,-0.40928 8.20713,-1.94078 12.89907,-7.24665 11.79825,-13.34131 -0.66932,-3.70562 -2.64466,-7.05988 -8.76122,-14.87816 -3.71042,-4.74272 -6.07912,-8.35062 -7.36906,-11.22464 z m 0.66559,17.25631 c 2.96333,0 7.87392,0.42321 9.44025,0.93121 0,0 2.62216,3.55012 3.77031,5.60018 0.39415,0.70375 0.82269,1.51205 0.82269,1.51205 -2.07433,-0.889 -12.0858,-1.14308 -13.90613,-1.14308 -1.524,0 -2.20141,0.16943 -2.20141,0.6351 0,1.48167 11.34504,-0.33908 11.34504,6.98459 0,5.07999 -3.55571,7.06985 -11.34504,7.06985 -2.92099,0 -6.858,-0.21181 -8.46667,-0.67748 0,0 -1.7824,-0.95541 -3.46335,-2.98948 -2.14013,-2.5897 -1.54513,-4.38164 -1.54513,-4.38164 1.94734,0.67733 10.25765,1.19062 13.30565,1.19062 1.98967,0 2.87889,-0.21185 2.87889,-0.71985 0,-1.48167 -11.17606,0.46555 -11.17606,-6.98511 0,-4.82599 3.68296,-7.02696 10.54096,-7.02696 z"
+           transform="matrix(1.4840218,0,0,1.4840218,-325.02668,-108.34223)" />
+        <text
+           xml:space="preserve"
+           style="font-weight:900;font-size:42.3333px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#000000;stroke-width:0.185208"
+           x="260.22626"
+           y="234.61343"
+           id="text2"><tspan
+             sodipodi:role="line"
+             id="tspan2"
+             style="stroke-width:0.185208"
+             x="260.22626"
+             y="234.61343">ugrNote</tspan></text>
+      </g>
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Dark">
+    <g
+       inkscape:groupmode="layer"
+       id="layer3"
+       inkscape:label="Bg">
+      <rect
+         style="fill:#000000;stroke-width:0.121438"
+         id="rect5"
+         width="373.66382"
+         height="206.375"
+         x="634.26361"
+         y="56.034565" />
+    </g>
+    <g
+       id="g4-9"
+       transform="matrix(0.44444445,0,0,0.44444445,608.70405,31.166151)"
+       style="fill:#ffffff"
+       inkscape:export-filename="dark-cover.png"
+       inkscape:export-xdpi="216"
+       inkscape:export-ydpi="216">
+      <path
+         id="rect1-2"
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.594623"
+         d="M 101.40415,73.835803 V 359.5858 h 508 V 73.835803 Z m 8.13748,7.9375 h 491.72503 c 0.1108,0 0.19999,0.08919 0.19999,0.199988 V 351.44832 c 0,0.1108 -0.0892,0.19998 -0.19999,0.19998 H 109.54163 c -0.1108,0 -0.19998,-0.0892 -0.19998,-0.19998 V 81.973291 c 0,-0.1108 0.0892,-0.199988 0.19998,-0.199988 z" />
+      <g
+         id="g3-2"
+         transform="translate(29.142091)"
+         style="fill:#ffffff">
+        <path
+           id="path1-9-1-0-26-8"
+           style="fill:#ffffff;stroke-width:0.876089"
+           inkscape:label="solidDrop"
+           d="m 376.02467,192.58891 -0.76895,1.78181 c -1.12685,2.6108 -3.93738,6.8536 -7.99486,12.06954 -6.46045,8.305 -8.10796,11.36408 -8.31422,15.43627 -0.10117,1.99734 -0.0338,2.58896 0.42891,3.75688 1.76083,4.44416 7.04019,7.917 13.3687,8.79378 2.13539,0.29585 6.386,0.0914 8.50335,-0.40928 8.20713,-1.94078 12.89907,-7.24665 11.79825,-13.34131 -0.66932,-3.70562 -2.64466,-7.05988 -8.76122,-14.87816 -3.71042,-4.74272 -6.07912,-8.35062 -7.36906,-11.22464 z m 0.66559,17.25631 c 2.96333,0 7.87392,0.42321 9.44025,0.93121 0,0 2.62216,3.55012 3.77031,5.60018 0.39415,0.70375 0.82269,1.51205 0.82269,1.51205 -2.07433,-0.889 -12.0858,-1.14308 -13.90613,-1.14308 -1.524,0 -2.20141,0.16943 -2.20141,0.6351 0,1.48167 11.34504,-0.33908 11.34504,6.98459 0,5.07999 -3.55571,7.06985 -11.34504,7.06985 -2.92099,0 -6.858,-0.21181 -8.46667,-0.67748 0,0 -1.7824,-0.95541 -3.46335,-2.98948 -2.14013,-2.5897 -1.54513,-4.38164 -1.54513,-4.38164 1.94734,0.67733 10.25765,1.19062 13.30565,1.19062 1.98967,0 2.87889,-0.21185 2.87889,-0.71985 0,-1.48167 -11.17606,0.46555 -11.17606,-6.98511 0,-4.82599 3.68296,-7.02696 10.54096,-7.02696 z"
+           transform="matrix(1.4840218,0,0,1.4840218,-325.02668,-108.34223)" />
+        <text
+           xml:space="preserve"
+           style="font-weight:900;font-size:42.3333px;font-family:'Baflion Sans';-inkscape-font-specification:'Baflion Sans Heavy';writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:0.185208"
+           x="260.22626"
+           y="234.61343"
+           id="text2-9"><tspan
+             sodipodi:role="line"
+             id="tspan2-7"
+             style="fill:#ffffff;stroke-width:0.185208"
+             x="260.22626"
+             y="234.61343">ugrNote</tspan></text>
+      </g>
+    </g>
   </g>
 </svg>

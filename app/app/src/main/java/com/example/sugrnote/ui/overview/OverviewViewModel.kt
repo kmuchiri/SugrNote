@@ -31,7 +31,10 @@ data class PeriodStats(
 data class InsulinStats24h(
     val longActing: Float,
     val shortActing: Float,
-    val total: Float
+    val total: Float,
+    val longActingInjections: Int,
+    val shortActingInjections: Int,
+    val totalInjections: Int
 )
 
 /**
@@ -81,13 +84,25 @@ class OverviewViewModel(
         .map { entries ->
             var longActing = 0f
             var shortActing = 0f
+            var longActingInjections = 0
+            var shortActingInjections = 0
             entries.forEach { entry ->
-                longActing += entry.longActingUnits ?: 0f
-                shortActing += entry.shortActingUnits ?: 0f
+                if (entry.longActingUnits != null) {
+                    longActing += entry.longActingUnits
+                    longActingInjections++
+                }
+                if (entry.shortActingUnits != null) {
+                    shortActing += entry.shortActingUnits
+                    shortActingInjections++
+                }
             }
-            InsulinStats24h(longActing, shortActing, longActing + shortActing)
+            InsulinStats24h(
+                longActing, shortActing, longActing + shortActing,
+                longActingInjections, shortActingInjections,
+                longActingInjections + shortActingInjections
+            )
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinStats24h(0f, 0f, 0f))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinStats24h(0f, 0f, 0f, 0, 0, 0))
 
     /** Stats for each carousel period, keyed by enum. */
     val periodStats: Map<StatsPeriod, StateFlow<PeriodStats>> =

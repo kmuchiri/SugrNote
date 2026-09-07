@@ -142,99 +142,188 @@ fun OverviewScreen(
             val latestCardVariantColor = if (latestStatusColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
             val latestCardPrimaryColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.primary
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = CardDefaults.shape,
-                        ambientColor = shadowColor,
-                        spotColor = shadowColor
-                    ),
-                onClick = {
-                    latestEntry?.let { onEntryClick(it.id) }
-                },
-                colors = CardDefaults.cardColors(
-                    containerColor = latestCardBgColor,
-                    contentColor = latestCardContentColor
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        "Latest Reading",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = latestCardVariantColor
+                // Latest Reading Card — left side
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CardDefaults.shape,
+                            ambientColor = shadowColor,
+                            spotColor = shadowColor
+                        ),
+                    onClick = {
+                        latestEntry?.let { onEntryClick(it.id) }
+                    },
+                    colors = CardDefaults.cardColors(
+                        containerColor = latestCardBgColor,
+                        contentColor = latestCardContentColor
                     )
-                    Spacer(Modifier.height(8.dp))
-
-                    if (latestEntry != null) {
-                        val entry = latestEntry!!
-                        val status = GlucoseStatus.fromValue(
-                            entry.glucoseMgDl,
-                            prefs.lowThresholdMgDl,
-                            prefs.highThresholdMgDl
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            "Latest Reading",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = latestCardVariantColor
                         )
-                        val statusLabel = when (status) {
-                            GlucoseStatus.LOW -> "Low"
-                            GlucoseStatus.IN_RANGE -> "In Range"
-                            GlucoseStatus.HIGH -> "High"
-                        }
+                        Spacer(Modifier.height(8.dp))
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (latestEntry != null) {
+                            val entry = latestEntry!!
+
                             Text(
                                 GlucoseUnitConverter.format(
                                     entry.glucoseMgDl,
                                     prefs.glucoseUnit
                                 ),
-                                style = MaterialTheme.typography.displayLarge
+                                style = MaterialTheme.typography.headlineLarge
                             )
-                            Spacer(Modifier.width(8.dp))
                             Text(
                                 prefs.glucoseUnit.displayLabel,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = latestCardVariantColor
                             )
-                        }
 
-                        Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(8.dp))
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                modifier = Modifier.size(10.dp),
-                                shape = CircleShape,
-                                color = Color.White
-                            ) {}
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                statusLabel,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
-                            )
-                            Spacer(Modifier.width(16.dp))
                             Text(
                                 entry.period.displayLabel,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = latestCardPrimaryColor
                             )
+
+                            Spacer(Modifier.height(4.dp))
+
+                            val instant = Instant.ofEpochMilli(entry.dateTime)
+                            val zoned = instant.atZone(ZoneId.systemDefault())
+                            Text(
+                                DateTimeUtils.formatRelativeDateTime(zoned, prefs),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = latestCardVariantColor
+                            )
+                        } else {
+                            Text(
+                                "No readings yet",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = latestCardVariantColor
+                            )
                         }
+                    }
+                }
 
-                        Spacer(Modifier.height(4.dp))
+                // Insulin (24h) Card — right side
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CardDefaults.shape,
+                            ambientColor = shadowColor,
+                            spotColor = shadowColor
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            "Insulin (24h)",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
 
-                        val instant = Instant.ofEpochMilli(entry.dateTime)
-                        val zoned = instant.atZone(ZoneId.systemDefault())
-                        Text(
-                            DateTimeUtils.formatDateTime(zoned, prefs),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = latestCardVariantColor
-                        )
-                    } else {
-                        Text(
-                            "No readings yet",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = latestCardVariantColor
-                        )
+                        if (insulinStats24h.totalInjections > 0) {
+                            val formatInsulin = { value: Float -> if (value % 1 == 0f) value.toInt().toString() else String.format("%.1f", value) }
+
+                            // Total units
+                            Text(
+                                "${formatInsulin(insulinStats24h.total)}u",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "${insulinStats24h.totalInjections} injection(s)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Spacer(Modifier.height(12.dp))
+
+                            // Last Long Acting injection
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9C27B0)))
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "Long Acting",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            if (latestLongActingEntry != null) {
+                                val longZoned = Instant.ofEpochMilli(latestLongActingEntry!!.dateTime)
+                                    .atZone(ZoneId.systemDefault())
+                                Text(
+                                    DateTimeUtils.formatRelativeDateTime(longZoned, prefs),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 14.dp)
+                                )
+                            } else {
+                                Text(
+                                    "None",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 14.dp)
+                                )
+                            }
+
+                            Spacer(Modifier.height(8.dp))
+
+                            // Last Short Acting injection
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF2196F3)))
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "Short Acting",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            if (latestShortActingEntry != null) {
+                                val shortZoned = Instant.ofEpochMilli(latestShortActingEntry!!.dateTime)
+                                    .atZone(ZoneId.systemDefault())
+                                Text(
+                                    DateTimeUtils.formatRelativeDateTime(shortZoned, prefs),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 14.dp)
+                                )
+                            } else {
+                                Text(
+                                    "None",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 14.dp)
+                                )
+                            }
+                        } else {
+                            Text(
+                                "No injections",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

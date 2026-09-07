@@ -1,14 +1,7 @@
 package com.example.sugrnote.ui.overview.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -28,23 +21,23 @@ import java.time.ZoneId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LatestReadingCard(
-    entry: GlucoseEntry?,
+    modifier: Modifier = Modifier,
+    latestEntry: GlucoseEntry?,
     prefs: UserPreferences,
     shadowColor: Color,
-    onEntryClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    onEntryClick: (Long) -> Unit
 ) {
-    val statusColor = entry?.let {
-        when (GlucoseStatus.fromValue(it.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl)) {
+    val latestStatusColor = latestEntry?.let { entry ->
+        when (GlucoseStatus.fromValue(entry.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl)) {
             GlucoseStatus.LOW -> StatusLow
             GlucoseStatus.IN_RANGE -> StatusInRange
             GlucoseStatus.HIGH -> StatusHigh
         }
     }
-    val bgColor = statusColor ?: MaterialTheme.colorScheme.surface
-    val contentColor = if (statusColor != null) Color.White else MaterialTheme.colorScheme.onSurface
-    val variantColor = if (statusColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
-    val primaryColor = if (statusColor != null) Color.White else MaterialTheme.colorScheme.primary
+    val latestCardBgColor = latestStatusColor ?: MaterialTheme.colorScheme.surface
+    val latestCardContentColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.onSurface
+    val latestCardVariantColor = if (latestStatusColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val latestCardPrimaryColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.primary
 
     Card(
         modifier = modifier
@@ -54,10 +47,12 @@ fun LatestReadingCard(
                 ambientColor = shadowColor,
                 spotColor = shadowColor
             ),
-        onClick = { entry?.let { onEntryClick(it.id) } },
+        onClick = {
+            latestEntry?.let { onEntryClick(it.id) }
+        },
         colors = CardDefaults.cardColors(
-            containerColor = bgColor,
-            contentColor = contentColor
+            containerColor = latestCardBgColor,
+            contentColor = latestCardContentColor
         )
     ) {
         Column(
@@ -66,19 +61,24 @@ fun LatestReadingCard(
             Text(
                 "Latest Reading",
                 style = MaterialTheme.typography.labelLarge,
-                color = variantColor
+                color = latestCardVariantColor
             )
             Spacer(Modifier.height(8.dp))
 
-            if (entry != null) {
+            if (latestEntry != null) {
+                val entry = latestEntry
+
                 Text(
-                    GlucoseUnitConverter.format(entry.glucoseMgDl, prefs.glucoseUnit),
+                    GlucoseUnitConverter.format(
+                        entry.glucoseMgDl,
+                        prefs.glucoseUnit
+                    ),
                     style = MaterialTheme.typography.headlineLarge
                 )
                 Text(
                     prefs.glucoseUnit.displayLabel,
                     style = MaterialTheme.typography.bodySmall,
-                    color = variantColor
+                    color = latestCardVariantColor
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -86,22 +86,23 @@ fun LatestReadingCard(
                 Text(
                     entry.period.displayLabel,
                     style = MaterialTheme.typography.bodySmall,
-                    color = primaryColor
+                    color = latestCardPrimaryColor
                 )
 
                 Spacer(Modifier.height(4.dp))
 
-                val zoned = Instant.ofEpochMilli(entry.dateTime).atZone(ZoneId.systemDefault())
+                val instant = Instant.ofEpochMilli(entry.dateTime)
+                val zoned = instant.atZone(ZoneId.systemDefault())
                 Text(
                     DateTimeUtils.formatRelativeDateTime(zoned, prefs),
                     style = MaterialTheme.typography.bodySmall,
-                    color = variantColor
+                    color = latestCardVariantColor
                 )
             } else {
                 Text(
                     "No readings yet",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = variantColor
+                    color = latestCardVariantColor
                 )
             }
         }

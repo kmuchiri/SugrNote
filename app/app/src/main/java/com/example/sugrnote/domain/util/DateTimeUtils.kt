@@ -33,4 +33,19 @@ object DateTimeUtils {
     fun formatDateTime(zoned: ZonedDateTime, prefs: UserPreferences): String {
         return "${formatDate(zoned, prefs)} • ${formatTime(zoned, prefs)}"
     }
+
+    fun formatRelativeDateTime(zoned: ZonedDateTime, prefs: UserPreferences): String {
+        val today = LocalDate.now(zoned.zone)
+        val entryDate = zoned.toLocalDate()
+        val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(entryDate, today)
+        val time = formatTime(zoned, prefs)
+
+        val dayLabel = when {
+            daysBetween == 0L -> "Today"
+            daysBetween == 1L -> "Yesterday"
+            daysBetween in 2..6 -> "$daysBetween days ago"
+            else -> formatDate(zoned, prefs)
+        }
+        return "$dayLabel • $time"
+    }
 }

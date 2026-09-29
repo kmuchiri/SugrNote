@@ -1,6 +1,6 @@
 # SugrNote
 
-> **Modern, offline-first Android companion for logging, tracking, and understanding your blood glucose, insulin doses, carbs, and daily trends.**
+> **A modern, offline-first Android companion for logging, tracking, and understanding your blood glucose, insulin doses, carbs, and daily trends.**
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
@@ -11,188 +11,87 @@
 
 ---
 
-## Features & Capabilities
+## About SugrNote
 
-SugrNote provides a complete, distraction-free diabetes management suite designed for individuals managing Type 1, Type 2, or gestational diabetes.
+SugrNote is a personal diabetes management companion built to make daily tracking effortless, informative, and private. Whether you are managing Type 1, Type 2, or gestational diabetes, SugrNote gives you a clear picture of how food, insulin, and activity affect your glucose levels over time—with zero distractions, zero ads, and zero cloud tracking.
 
-### 🩸 1. Comprehensive Glucose Logging
-
-- **Fast, Flexible Manual Entry**: Log blood glucose readings with date, time, and custom tags in seconds.
-
-- **Contextual Meal & Time Periods**:
-  - `Fasting`
-  - `Before Meal` / `After Meal` (paired with `Breakfast`, `Lunch`, `Dinner`, `Snack`)
-  - `Before Sleep`
-  - `Random`
-- **Dual Unit Support (`mg/dL` & `mmol/L`)**:
-  - Seamlessly switch units anytime in Settings.
-  - All readings are stored canonically in `mg/dL` internally, preventing precision loss or corruption during conversions.
-
-- **Unusual Value Safeguards**: Prompts a confirmation dialog if an entered reading is atypically low (< 20 mg/dL) or high (> 600 mg/dL) to prevent accidental typos while preserving medically valid edge cases.
-
-- **Notes & Journaling**: Attach notes (up to 254 characters) to any entry for symptoms, mood, or context.
-
-### 💉 2. Insulin & Dose Tracking
-
-- **Multi-Insulin Regimen**: Log **Long-Acting** (basal), **Short-Acting** (bolus), **Both**, or **None**.
-- **Precise Unit Measurement**: Input exact insulin units with decimal support.
-- **24-Hour Insulin Summary**: Real-time aggregation of total units taken in the last 24 hours, long vs. short breakdown, and total injection counts.
-- **Multi-Period Insulin Averages**: Calculate average daily doses and injection counts across 7D, 14D, 30D, 60D, and 90D windows.
-- **Dedicated Dose Tab in Logbook**: View an organized chronological timeline specifically filtered for insulin doses with daily total summaries.
-
-### 🥗 3. Food & Carbohydrate Tracking
-
-- **Carb Logging (grams)**: Track carbohydrate consumption linked directly to meals and bolus insulin doses.
-- **MealPeriod Coupling**: Selecting meal periods (`Before Meal`, `After Meal`) automatically prompts for carb intake.
-
-### 🏃 4. Exercise & Physical Activity Correlation
-
-- **Exercise Timing Correlation**: Tag readings as `None`, `Before Exercise`, or `After Exercise` to observe how physical exertion affects glycemic response.
-- **Duration & Intensity**: Record workout duration (minutes) and intensity (`Light`, `Moderate`, `Vigorous`).
-- **Activity Badges**: Activity information is clearly badged in both the Logbook and Overview cards.
-
-### 📊 5. Visual Analytics, Trends & Time-in-Range (TIR)
-
-- **Interactive Custom Canvas Trend Graph**:
-  - **24-Hour View**: Plots actual raw readings sequentially across the day.
-  - **Aggregated Hourly Trend (7D / 14D / 30D / 60D / 90D)**: Buckets readings into 24 hour-of-day slots, displaying mean trajectories and single-point representations.
-- **Summary Metrics**:
-  - Period Average, Total Reading Count, Lowest Reading, and Highest Reading.
-  - **Time-in-Range (TIR) Bar**: Visual tri-color distribution bar showing proportion of readings that are **Low** (Red), **Target / In-Range** (Green), and **High** (Amber).
-- **Averages by Meal Card**: Segmented breakdown of average glucose during Fasting, Before Meal, After Meal, Before Sleep, and Random across 7D, 14D, 30D, 60D, and 90D.
-- **Latest Reading Card**: Glanceable hero card displaying the latest blood glucose level, timestamp, period, exercise timing, and range status.
-
-### 📖 6. Dual-Mode Logbook
-
-- **Glucose Tab**:
-  - Grouped chronologically by date.
-  - Colored indicator dots (`StatusLow`, `StatusInRange`, `StatusHigh`).
-  - Icons indicating insulin administered (`Medication`) and food logged (`Restaurant`).
-  - Period and exercise timing chips.
-  - Tap to edit any entry; delete button with confirmation dialog.
-- **Dose Tab**:
-  - Grouped by date with a daily total dose header (e.g., `Total Dose: 28u`).
-  - Distinct colored badges for Long-Acting (Purple) and Short-Acting (Blue) doses, plus logged carbs.
-
-### 🔔 7. Persistent Android Notification
-
-- **Live Lockscreen & Shade Monitor**: Always-visible low-importance notification displaying the most recent reading, timestamp, and status.
-- **Dynamic Color-Coding**: Colored background tint that reflects glycemic status:
-  - 🟢 **Green**: In Range
-  - 🔴 **Red**: Low / Hypoglycemia
-  - 🟠 **Amber**: High / Hyperglycemia
-- **One-Tap Access**: Tapping the notification launches directly into the app.
-
-### 📱 8. Homescreen App Widget
-
-- **Glanceable Widget (`AddEntryWidgetProvider`)**: Place a widget on your home screen displaying your latest reading, unit, status color, time, and exercise timing.
-- **Quick-Add Shortcut**: Tap the widget anywhere to jump straight into the Add Entry form.
-- **Reactive Sync**: Automatically updates the instant an entry is added, updated, or removed in the app.
-
-### 🎨 9. Customization & System Preferences
-
-- **Theme Options**:
-  - System default, Light mode, or Dark mode.
-  - **Pure OLED Dark Mode**: True black (`#000000`) surfaces for OLED displays and battery savings.
-- **Customizable Glycemic Thresholds**:
-  - Set personal **Low Threshold** (default: 70 mg/dL / 3.9 mmol/L) and **High Threshold** (default: 180 mg/dL / 10.0 mmol/L).
-  - Validation guarantees low threshold remains below high threshold.
-- **Date & Time Formatting**:
-  - 12-Hour (AM/PM) or 24-Hour military time.
-  - Date formats: `dd MMM, yyyy` (e.g., *22 Jun, 2026*) or `MMM dd, yyyy` (e.g., *Jun 22, 2026*).
-
-### 🔒 10. Privacy & Offline-First Architecture
-
-- **100% On-Device Storage**: No mandatory accounts, logins, telemetry, or remote servers. All medical data stays strictly on your device in a local SQLite database.
+> [!NOTE]
+> **Notice on Meter Screen OCR:** Automated camera scanning and Optical Character Recognition (OCR) for meter screens have been **shelved for now**. We have focused entirely on making manual logging instantaneous, refining insulin and carb calculations, and providing dependable offline trends.
 
 ---
 
-## Application Structure
+## What SugrNote Does
 
-```
+### 🩸 Fast & Reliable Glucose Logging
+Log your blood sugar in seconds with clear contextual tags, including Fasting, Before or After Meals (Breakfast, Lunch, Dinner, Snack), Bedtime, and Random checks. SugrNote supports both **mg/dL** and **mmol/L** with automatic, lossless conversion, guards against accidental typo values, and lets you attach personal notes to any reading.
 
-SugrNote
-├── Overview Screen
-│   ├── Latest Reading Card (Hero BG reading + Status + Exercise info)
-│   ├── 24-Hour Insulin Intake Card (Long vs Short units + Timestamps)
-│   ├── Trends & Averages Card (Custom Canvas chart + TIR bar + Stats + Range filters)
-│   ├── Averages by Meal Card (Fasting, Before/After meal, Bedtime, Random)
-│   └── Average Total Insulin Card (Long, Short, Total daily doses across 7–90D)
-│
-├── Logbook Screen
-│   ├── Glucose View (Grouped by date, status pills, edit/delete actions)
-│   └── Dose View (Grouped by date, total daily units, long/short/carbs)
-│
-├── Entry Screen (Add / Edit)
-│   ├── Date & Time Pickers
-│   ├── Glucose Value Input (with unit indication & range safety prompt)
-│   ├── Period Selector (Fasting, Before/After Meal, Bedtime, Random)
-│   ├── Meal Type (Breakfast, Lunch, Dinner, Snack)
-│   ├── Insulin Selector & Unit Inputs (Long-Acting, Short-Acting, Both, None)
-│   ├── Food & Carb Input (Grams of Carbohydrates)
-│   ├── Exercise Timing, Duration & Intensity
-│   └── Notes Input (up to 254 chars)
-│
-└── You / Settings Screen
-    ├── Glucose Unit (mg/dL vs mmol/L)
-    ├── Target Thresholds (Low & High)
-    ├── Time & Date Formats (12h/24h, custom date patterns)
-    └── Theme Options (System / Light / Dark / OLED)
+### 💉 Comprehensive Insulin Tracking
+Easily record Long-Acting (basal) and Short-Acting (bolus) insulin doses. An interactive 24-hour summary card aggregates your recent intake and injection counts, while multi-week averages (7 to 90 days) help you spot dosing trends over time.
 
-```
+### 🥗 Nutrition & Physical Activity
+Keep track of carbohydrate intake in grams directly linked to your meals and insulin doses. You can also log exercise timing (before or after workouts), duration, and intensity to see firsthand how exercise shapes your glycemic response.
 
-## Tech Stack & Architecture
+### 📊 Trends, Averages & Time-in-Range (TIR)
+Understand your health patterns at a glance. An interactive trend chart lets you explore raw 24-hour readings or review hourly averages across 7, 14, 30, 60, or 90 days. A visual Time-in-Range bar clearly displays the proportion of readings that fall within your target, low, or high zones, accompanied by mealtime breakdowns.
 
-- **Language**: Kotlin 2.0+
-- **UI Framework**: Jetpack Compose with Material Design 3 (M3)
-- **Architecture**: Clean Architecture + MVVM (Model-View-ViewModel) + Reactive UDF (Unidirectional Data Flow)
-- **Local Database**: Room 2.6+ with SQLite, TypeConverters, and reactive Kotlin `Flow`s
-- **Preferences Storage**: Jetpack DataStore (Preferences)
-- **Asynchronous Execution**: Kotlin Coroutines & StateFlow
-- **Date / Time Handling**: `java.time` (Desugared for backwards compatibility)
-- **Hardware & System**: Android AppWidgetProvider, NotificationManager (Ongoing colorized notifications)
-- **Compilation Target**:
-  - `minSdk`: 30 (Android 11)
-  - `targetSdk`: 36
-  - `compileSdk`: 36
-  - `Java/JVM`: 17
+### 📖 Dual-View Logbook
+Browse your complete history organized chronologically by day. Switch seamlessly between a **Glucose view** with color-coded status badges and an **Insulin Dose view** that summarizes total daily units and mealtime carbs. Every entry can be edited or deleted with safety confirmations.
+
+### 🔔 Live Notification & Home Screen Widget
+Stay connected to your latest reading without opening the app. A persistent, color-coded notification in your status shade reflects your current glycemic range (green for in-range, red for low, amber for high). A glanceable home screen widget provides an instant snapshot and a one-tap shortcut to log new readings on the go.
+
+### 🎨 Personalization & Total Privacy
+Customize your target blood glucose thresholds, choose between 12-hour and 24-hour clocks, select your preferred date format, and switch between Light, Dark, or battery-friendly OLED true-black themes. Best of all, all data is stored exclusively on your device in a secure local database—your medical data belongs to you.
 
 ---
 
-## Getting Started & Building
+## 🧭 Application Structure
+
+SugrNote is organized into four main areas:
+- **Overview**: Your health dashboard featuring the latest reading hero card, 24-hour insulin intake, interactive trend graphs, Time-in-Range statistics, and mealtime averages.
+- **Logbook**: A chronological diary with dedicated tabs for Glucose readings and Insulin doses.
+- **Entry Form**: A clean, unified form for quickly logging blood sugar, meal periods, insulin units, carbs, exercise, and notes.
+- **You & Settings**: Personal preferences for units (mg/dL vs. mmol/L), target thresholds, date and time styles, and appearance themes.
+
+---
+
+## 🚀 Upcoming Roadmap
+
+Upcoming development priorities are documented in detail in **[docs/roadmap.md](docs/roadmap.md)**:
+
+- **Carb-to-Insulin Ratio (CIR) Calculator & Bolus Advisor**: An in-app wizard to calculate recommended meal doses and high blood sugar correction doses based on your target glucose, insulin sensitivity factor (ISF), and active insulin on board (IOB).
+- **Medical Reports & Data Export**: High-resolution PDF reports (Ambulatory Glucose Profile / AGP format) ready for endocrinologist appointments, plus CSV and JSON data exports.
+- **Smart Reminders**: Automated 2-hour post-meal testing notifications and daily basal injection alarms.
+- **Encrypted Backups**: Password-protected database backups and optional user-owned cloud synchronization.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+SugrNote is built following modern Android best practices using Kotlin and Jetpack Compose for a reactive, single-activity user interface. It utilizes Clean Architecture with MVVM, Coroutines, and StateFlow for unidirectional data flow. Persistence is handled on-device using a Room SQLite database and Jetpack DataStore Preferences. It targets Android SDK 36 with a minimum compatibility of Android 11 (API 30).
+
+Detailed technical documentation and database schemas are available in **[docs/README.md](docs/README.md)**.
+
+---
+
+## 📥 Getting Started
 
 ### Prerequisites
-
 - Android Studio Ladybug (2024.2+) or newer
-- Android SDK 36
-- JDK 17
+- Android SDK 36 (Java 17)
 
 ### Build & Run
+```bash
+# Clone the repository
+git clone https://github.com/kmuchiri/SugrNote.git
+cd SugrNote/app
 
-1. Clone the repository:
+# Build debug APK
+./gradlew assembleDebug
 
-   ```bash
-   git clone https://github.com/kmuchiri/SugrNote.git
-   cd SugrNote/app
-   ```
-
-2. Build debug APK:
-
-   ```bash
-   ./gradlew assembleDebug
-   ```
-
-3. Run unit tests:
-
-   ```bash
-   ./gradlew test
-   ```
-
-4. Install on a connected Android device or emulator:
-
-   ```bash
-   ./gradlew installDebug
-   ```
+# Run tests
+./gradlew testDebugUnitTest
+```
 
 ---
 

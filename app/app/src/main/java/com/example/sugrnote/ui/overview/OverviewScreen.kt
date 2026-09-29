@@ -73,9 +73,8 @@ fun OverviewScreen(
     val prefs by viewModel.userPreferences.collectAsState()
     val selectedTimeRange by trendsViewModel.selectedTimeRange.collectAsState()
     val aggregatedData by trendsViewModel.aggregatedData.collectAsState()
+    val trendsPeriodStats by trendsViewModel.periodStats.collectAsState()
     val context = LocalContext.current
-
-    val periods = StatsPeriod.entries
 
     Scaffold(
         topBar = {
@@ -140,12 +139,7 @@ fun OverviewScreen(
                 selectedTimeRange = selectedTimeRange,
                 onTimeRangeSelected = { trendsViewModel.setTimeRange(it) },
                 aggregatedData = aggregatedData,
-                prefs = prefs
-            )
-
-            GlucoseAveragesCard(
-                modifier = Modifier.fillMaxWidth(),
-                periodStats = viewModel.periodStats,
+                periodStats = trendsPeriodStats,
                 prefs = prefs
             )
 

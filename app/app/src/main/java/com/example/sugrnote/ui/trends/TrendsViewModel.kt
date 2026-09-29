@@ -6,6 +6,7 @@ import com.example.sugrnote.data.repository.GlucoseRepository
 import com.example.sugrnote.data.settings.SettingsRepository
 import com.example.sugrnote.data.settings.UserPreferences
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
+import com.example.sugrnote.ui.overview.PeriodStats
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -85,6 +86,35 @@ class TrendsViewModel(
             }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TrendsData.Aggregated(List(24) { null }))
+
+    val periodStats: StateFlow<PeriodStats> = combine(
+        entriesFlow,
+        userPreferences
+    ) { entries, prefs ->
+        if (entries.isEmpty()) {
+            PeriodStats(null, 0, 0, 0, 0, null, null)
+        } else {
+            val count = entries.size
+            val average = entries.map { it.glucoseMgDl }.average().toFloat()
+            val min = entries.minOf { it.glucoseMgDl }
+            val max = entries.maxOf { it.glucoseMgDl }
+            var lowCount = 0
+            var inRangeCount = 0
+            var highCount = 0
+            
+            entries.forEach { entry ->
+                val status = com.example.sugrnote.domain.model.GlucoseStatus.fromValue(
+                    entry.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl
+                )
+                when (status) {
+                    com.example.sugrnote.domain.model.GlucoseStatus.LOW -> lowCount++
+                    com.example.sugrnote.domain.model.GlucoseStatus.IN_RANGE -> inRangeCount++
+                    com.example.sugrnote.domain.model.GlucoseStatus.HIGH -> highCount++
+                }
+            }
+            PeriodStats(average, count, lowCount, inRangeCount, highCount, min, max)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PeriodStats(null, 0, 0, 0, 0, null, null))
 
     fun setTimeRange(range: TimeRange) {
         _selectedTimeRange.value = range

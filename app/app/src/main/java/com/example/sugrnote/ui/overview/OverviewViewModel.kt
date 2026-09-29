@@ -104,40 +104,6 @@ class OverviewViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InsulinStats24h(0f, 0f, 0f, 0, 0, 0))
 
-    /** Stats for each carousel period, keyed by enum. */
-    val periodStats: Map<StatsPeriod, StateFlow<PeriodStats>> =
-        StatsPeriod.entries.associateWith { period ->
-            val sinceMillis = System.currentTimeMillis() - period.daysBack * 24 * 60 * 60 * 1000L
-            combine(
-                repository.observeEntriesSince(sinceMillis),
-                userPreferences
-            ) { entries, prefs ->
-                if (entries.isEmpty()) {
-                    PeriodStats(null, 0, 0, 0, 0, null, null)
-                } else {
-                    val count = entries.size
-                    val average = entries.map { it.glucoseMgDl }.average().toFloat()
-                    val min = entries.minOf { it.glucoseMgDl }
-                    val max = entries.maxOf { it.glucoseMgDl }
-                    var lowCount = 0
-                    var inRangeCount = 0
-                    var highCount = 0
-                    
-                    entries.forEach { entry ->
-                        val status = com.example.sugrnote.domain.model.GlucoseStatus.fromValue(
-                            entry.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl
-                        )
-                        when (status) {
-                            com.example.sugrnote.domain.model.GlucoseStatus.LOW -> lowCount++
-                            com.example.sugrnote.domain.model.GlucoseStatus.IN_RANGE -> inRangeCount++
-                            com.example.sugrnote.domain.model.GlucoseStatus.HIGH -> highCount++
-                        }
-                    }
-                    
-                    PeriodStats(average, count, lowCount, inRangeCount, highCount, min, max)
-                }
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PeriodStats(null, 0, 0, 0, 0, null, null))
-        }
 
     val insulinPeriodStats: Map<StatsPeriod, StateFlow<InsulinPeriodStats>> =
         StatsPeriod.entries.associateWith { period ->

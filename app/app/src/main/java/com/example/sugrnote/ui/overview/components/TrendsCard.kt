@@ -40,7 +40,7 @@ fun TrendsCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Trending Glucose",
+                "Glucose Trend & Averages",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -52,16 +52,33 @@ fun TrendsCard(
             ) {
                 TimeRange.entries.forEachIndexed { index, range ->
                     SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = TimeRange.entries.size),
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index, 
+                            count = TimeRange.entries.size,
+                            baseShape = RoundedCornerShape(8.dp)
+                        ),
                         onClick = { onTimeRangeSelected(range) },
-                        selected = selectedTimeRange == range
+                        selected = selectedTimeRange == range,
+                        icon = {}
                     ) {
                         Text(range.display)
                     }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            // Graph Area
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .padding(top = 16.dp, bottom = 16.dp)
+            ) {
+                TrendsGraph(
+                    data = aggregatedData,
+                    prefs = prefs,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
 
             // Averages and stats
             if (periodStats.average != null) {
@@ -166,20 +183,6 @@ fun TrendsCard(
                     "No data available",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // Graph Area
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .padding(top = 16.dp)
-            ) {
-                TrendsGraph(
-                    data = aggregatedData,
-                    prefs = prefs,
-                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

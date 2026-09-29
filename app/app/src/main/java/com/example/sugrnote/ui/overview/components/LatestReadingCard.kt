@@ -1,14 +1,15 @@
 package com.example.sugrnote.ui.overview.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.sugrnote.data.local.GlucoseEntry
 import com.example.sugrnote.data.settings.UserPreferences
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.GlucoseStatus
 import com.example.sugrnote.domain.util.DateTimeUtils
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
@@ -24,7 +25,6 @@ fun LatestReadingCard(
     modifier: Modifier = Modifier,
     latestEntry: GlucoseEntry?,
     prefs: UserPreferences,
-    shadowColor: Color,
     onEntryClick: (Long) -> Unit
 ) {
     val latestStatusColor = latestEntry?.let { entry ->
@@ -40,16 +40,11 @@ fun LatestReadingCard(
     val latestCardPrimaryColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.primary
 
     Card(
-        modifier = modifier
-            .shadow(
-                elevation = 8.dp,
-                shape = CardDefaults.shape,
-                ambientColor = shadowColor,
-                spotColor = shadowColor
-            ),
+        modifier = modifier,
         onClick = {
             latestEntry?.let { onEntryClick(it.id) }
         },
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(
             containerColor = latestCardBgColor,
             contentColor = latestCardContentColor
@@ -83,8 +78,13 @@ fun LatestReadingCard(
 
                 Spacer(Modifier.height(8.dp))
 
+                val periodLabel = if (entry.exerciseTiming != ExerciseTiming.NONE) {
+                    "${entry.period.displayLabel} · ${entry.exerciseTiming.displayLabel}"
+                } else {
+                    entry.period.displayLabel
+                }
                 Text(
-                    entry.period.displayLabel,
+                    periodLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = latestCardPrimaryColor
                 )

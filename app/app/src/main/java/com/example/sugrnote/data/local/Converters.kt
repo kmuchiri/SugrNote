@@ -2,6 +2,7 @@ package com.example.sugrnote.data.local
 
 import androidx.room.TypeConverter
 import com.example.sugrnote.domain.model.EntrySource
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.model.Period
 
@@ -23,4 +24,10 @@ class Converters {
 
     @TypeConverter
     fun toEntrySource(value: String): EntrySource = EntrySource.valueOf(value)
+
+    @TypeConverter
+    fun fromExerciseTiming(value: ExerciseTiming): String = value.name
+
+    @TypeConverter
+    fun toExerciseTiming(value: String): ExerciseTiming = ExerciseTiming.valueOf(value)
 }

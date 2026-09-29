@@ -1,6 +1,9 @@
 # Glucose Tracker App — Phase 1 Implementation Plan
-**Scope:** Manual entry + local storage + settings + overview stats. No camera/OCR in this phase (that's Phase 2).
-**Target:** Android Studio project, minSdk/targetSdk compatible with API ≤ 30, Kotlin, Jetpack Compose.
+**Scope:** Manual entry + local storage + settings + overview stats.
+**Target:** Android Studio project, Kotlin, Jetpack Compose, Room.
+
+> [!NOTE]
+> **Implementation Status:** Phase 1 core functionality is fully implemented. The originally planned Phase 2 OCR meter scanning has been **shelved for now** in favor of advanced analytics and clinical bolus/carb calculation tools. See [README.md](../README.md) and [docs/README.md](README.md) for the active documentation and roadmap.
 
 ---
 

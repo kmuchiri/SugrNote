@@ -2,6 +2,10 @@ package com.example.sugrnote.ui.entry
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -56,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sugrnote.domain.model.InsulinType
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.Period
 import java.time.Instant
 import java.time.LocalTime
@@ -296,9 +301,28 @@ fun EntryScreen(
                 }
             }
 
-            // Exercise Details (conditional)
+            // Exercise Timing (independent of period)
+            Text("Exercise", style = MaterialTheme.typography.labelLarge)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ExerciseTiming.entries.forEach { timing ->
+                    FilterChip(
+                        selected = viewModel.exerciseTiming == timing,
+                        onClick = { viewModel.onExerciseTimingChanged(timing) },
+                        label = { Text(timing.displayLabel) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
+            }
+
+            // Exercise Details (conditional on Before Exercise)
             AnimatedVisibility(
-                visible = viewModel.basePeriod == BasePeriod.BEFORE_EXERCISE
+                visible = viewModel.exerciseTiming == ExerciseTiming.BEFORE_EXERCISE
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -414,46 +438,79 @@ fun EntryScreen(
                 }
             }
 
-            // Food
-            Text("Food", style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = viewModel.hasFood,
-                    onClick = { viewModel.onHasFoodChanged(true) },
-                    label = { Text("Yes") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-                FilterChip(
-                    selected = !viewModel.hasFood,
-                    onClick = { viewModel.onHasFoodChanged(false) },
-                    label = { Text("No") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-            }
-
-            // Carb amount (conditional)
-            AnimatedVisibility(visible = viewModel.hasFood) {
-                Column {
-                    Text("Carb amount (g)", style = MaterialTheme.typography.labelLarge)
+            // Food and Carb amount
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Food", style = MaterialTheme.typography.labelLarge)
                     Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = viewModel.carbAmountText,
-                        onValueChange = { viewModel.onCarbAmountChanged(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        isError = viewModel.carbError != null,
-                        supportingText = viewModel.carbError?.let { { Text(it) } },
-                        singleLine = true
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = viewModel.hasFood,
+                            onClick = { viewModel.onHasFoodChanged(true) },
+                            label = { Text("Yes") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                        FilterChip(
+                            selected = !viewModel.hasFood,
+                            onClick = { viewModel.onHasFoodChanged(false) },
+                            label = { Text("No") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    AnimatedVisibility(
+                        visible = viewModel.hasFood,
+                        enter = expandHorizontally(expandFrom = Alignment.Start) + slideInHorizontally(initialOffsetX = { -it / 2 }),
+                        exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + slideOutHorizontally(targetOffsetX = { -it / 2 }),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column {
+                            Text("Carb amount (g)", style = MaterialTheme.typography.labelLarge)
+                            Spacer(Modifier.height(4.dp))
+                            OutlinedTextField(
+                                value = viewModel.carbAmountText,
+                                onValueChange = { viewModel.onCarbAmountChanged(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                isError = viewModel.carbError != null,
+                                supportingText = viewModel.carbError?.let { { Text(it) } },
+                                singleLine = true
+                            )
+                        }
+                    }
                 }
             }
-
+            
+            // Notes
+            Column {
+                Text("Notes", style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = viewModel.notesText,
+                    onValueChange = { viewModel.onNotesChanged(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    maxLines = 5,
+                    supportingText = {
+                        Text(
+                            text = "${viewModel.notesText.length} / 254",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.End
+                        )
+                    }
+                )
+            }
         }
     }
 }

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sugrnote.data.local.GlucoseEntry
 import com.example.sugrnote.domain.model.GlucoseStatus
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
 import com.example.sugrnote.ui.theme.StatusHigh
@@ -386,8 +387,13 @@ private fun LogbookEntryCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    val periodLabel = if (entry.exerciseTiming != ExerciseTiming.NONE) {
+                        "${entry.period.displayLabel} · ${entry.exerciseTiming.displayLabel}"
+                    } else {
+                        entry.period.displayLabel
+                    }
                     Text(
-                        entry.period.displayLabel,
+                        periodLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )

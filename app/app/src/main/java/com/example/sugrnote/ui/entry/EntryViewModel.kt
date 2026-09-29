@@ -10,6 +10,7 @@ import com.example.sugrnote.data.repository.GlucoseRepository
 import com.example.sugrnote.data.settings.SettingsRepository
 import com.example.sugrnote.data.settings.UserPreferences
 import com.example.sugrnote.domain.model.EntrySource
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.GlucoseUnit
 import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.model.Period
@@ -29,8 +30,6 @@ enum class BasePeriod(val displayLabel: String) {
     BEFORE_MEAL("Before Meal"),
     AFTER_MEAL("After Meal"),
     BEFORE_SLEEP("Before Sleep"),
-    BEFORE_EXERCISE("Before Exercise"),
-    AFTER_EXERCISE("After Exercise"),
     RANDOM("Random")
 }
 
@@ -65,6 +64,8 @@ class EntryViewModel(
         private set
     var mealType by mutableStateOf(MealType.BREAKFAST)
         private set
+    var exerciseTiming by mutableStateOf(ExerciseTiming.NONE)
+        private set
     var insulinType by mutableStateOf(InsulinType.NONE)
         private set
     var longActingUnitsText by mutableStateOf("")
@@ -79,6 +80,8 @@ class EntryViewModel(
     var exerciseIntensity by mutableStateOf("Light")
         private set
     var exerciseDurationText by mutableStateOf("")
+        private set
+    var notesText by mutableStateOf("")
         private set
 
     // Validation errors
@@ -134,8 +137,6 @@ class EntryViewModel(
                     Period.BEFORE_BREAKFAST, Period.BEFORE_LUNCH, Period.BEFORE_DINNER, Period.BEFORE_SNACK -> BasePeriod.BEFORE_MEAL
                     Period.AFTER_BREAKFAST, Period.AFTER_LUNCH, Period.AFTER_DINNER, Period.AFTER_SNACK -> BasePeriod.AFTER_MEAL
                     Period.BEFORE_SLEEP -> BasePeriod.BEFORE_SLEEP
-                    Period.BEFORE_EXERCISE -> BasePeriod.BEFORE_EXERCISE
-                    Period.AFTER_EXERCISE -> BasePeriod.AFTER_EXERCISE
                     Period.RANDOM -> BasePeriod.RANDOM
                 }
                 mealType = when (period) {
@@ -145,7 +146,8 @@ class EntryViewModel(
                     Period.BEFORE_SNACK, Period.AFTER_SNACK -> MealType.SNACK
                     else -> MealType.BREAKFAST
                 }
-                
+
+                exerciseTiming = entry.exerciseTiming
                 insulinType = entry.insulinType
                 longActingUnitsText = entry.longActingUnits?.toString() ?: ""
                 shortActingUnitsText = entry.shortActingUnits?.toString() ?: ""
@@ -153,6 +155,7 @@ class EntryViewModel(
                 carbAmountText = entry.carbAmount?.toString() ?: ""
                 exerciseIntensity = entry.exerciseIntensity ?: "Light"
                 exerciseDurationText = entry.exerciseDuration?.toString() ?: ""
+                notesText = entry.notes
             }
         }
     }
@@ -168,8 +171,7 @@ class EntryViewModel(
         basePeriod = newPeriod
         when (newPeriod) {
             BasePeriod.BEFORE_MEAL -> onHasFoodChanged(true)
-            BasePeriod.FASTING, BasePeriod.RANDOM, BasePeriod.BEFORE_SLEEP,
-            BasePeriod.BEFORE_EXERCISE, BasePeriod.AFTER_EXERCISE -> onHasFoodChanged(false)
+            BasePeriod.FASTING, BasePeriod.RANDOM, BasePeriod.BEFORE_SLEEP -> onHasFoodChanged(false)
             BasePeriod.AFTER_MEAL -> { /* retain current food selection */ }
         }
         updateActualPeriod()
@@ -180,12 +182,18 @@ class EntryViewModel(
         updateActualPeriod()
     }
 
+    fun onExerciseTimingChanged(newTiming: ExerciseTiming) {
+        exerciseTiming = newTiming
+        if (newTiming != ExerciseTiming.BEFORE_EXERCISE) {
+            exerciseDurationText = ""
+            exerciseDurationError = null
+        }
+    }
+
     private fun updateActualPeriod() {
         period = when (basePeriod) {
             BasePeriod.FASTING -> Period.FASTING
             BasePeriod.BEFORE_SLEEP -> Period.BEFORE_SLEEP
-            BasePeriod.BEFORE_EXERCISE -> Period.BEFORE_EXERCISE
-            BasePeriod.AFTER_EXERCISE -> Period.AFTER_EXERCISE
             BasePeriod.RANDOM -> Period.RANDOM
             BasePeriod.BEFORE_MEAL -> when (mealType) {
                 MealType.BREAKFAST -> Period.BEFORE_BREAKFAST
@@ -238,6 +246,11 @@ class EntryViewModel(
     fun onExerciseDurationChanged(text: String) {
         exerciseDurationText = text
         exerciseDurationError = null
+    }
+    fun onNotesChanged(text: String) {
+        if (text.length <= 254) {
+            notesText = text
+        }
     }
 
     fun onDismissUnusualValueDialog() {
@@ -303,7 +316,7 @@ class EntryViewModel(
 
         // Validate exercise
         var duration: Int? = null
-        if (basePeriod == BasePeriod.BEFORE_EXERCISE) {
+        if (exerciseTiming == ExerciseTiming.BEFORE_EXERCISE) {
             if (exerciseDurationText.isNotBlank()) {
                 duration = exerciseDurationText.toIntOrNull()
                 if (duration == null || duration <= 0) {
@@ -322,14 +335,16 @@ class EntryViewModel(
             glucoseMgDl = glucoseMgDl,
             dateTime = epochMillis,
             period = period,
+            exerciseTiming = exerciseTiming,
             insulinType = insulinType,
             longActingUnits = longUnits,
             shortActingUnits = shortUnits,
             hasFood = hasFood,
             carbAmount = carbs,
-            exerciseIntensity = if (basePeriod == BasePeriod.BEFORE_EXERCISE) exerciseIntensity else null,
-            exerciseDuration = if (basePeriod == BasePeriod.BEFORE_EXERCISE) duration else null,
-            sourceType = EntrySource.MANUAL
+            exerciseIntensity = if (exerciseTiming == ExerciseTiming.BEFORE_EXERCISE) exerciseIntensity else null,
+            exerciseDuration = if (exerciseTiming == ExerciseTiming.BEFORE_EXERCISE) duration else null,
+            sourceType = EntrySource.MANUAL,
+            notes = notesText.trim()
         )
 
         viewModelScope.launch {

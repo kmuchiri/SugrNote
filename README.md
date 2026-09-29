@@ -17,6 +17,14 @@ SugrNote is a simple personal diabetes management companion built to make daily 
 
 ---
 
+## 📱 Screenshots
+
+| Overview Dashboard | Logbook History | Add / Edit Entry |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/Screenshot_20260929-152150.png" width="260" alt="Overview Dashboard" /> | <img src="docs/screenshots/Screenshot_20260929-152158.png" width="260" alt="Logbook History" /> | <img src="docs/screenshots/Screenshot_20260929-152141.png" width="260" alt="Add / Edit Entry" /> |
+
+---
+
 ## What SugrNote Does
 
 ### 🩸 Fast & Reliable Glucose Logging

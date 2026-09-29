@@ -13,6 +13,7 @@ import com.example.sugrnote.R
 import com.example.sugrnote.data.local.AppDatabase
 import com.example.sugrnote.data.repository.GlucoseRepository
 import com.example.sugrnote.data.settings.SettingsRepository
+import com.example.sugrnote.domain.model.ExerciseTiming
 import com.example.sugrnote.domain.model.GlucoseStatus
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
 import kotlinx.coroutines.CoroutineScope
@@ -117,7 +118,12 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
             
             views.setTextViewText(R.id.widget_text_reading, formattedValue)
             views.setTextViewText(R.id.widget_text_unit, prefs.glucoseUnit.displayLabel)
-            views.setTextViewText(R.id.widget_text_period, latestEntry.period.displayLabel)
+            val periodLabel = if (latestEntry.exerciseTiming != ExerciseTiming.NONE) {
+                "${latestEntry.period.displayLabel} · ${latestEntry.exerciseTiming.displayLabel}"
+            } else {
+                latestEntry.period.displayLabel
+            }
+            views.setTextViewText(R.id.widget_text_period, periodLabel)
             
             val instant = java.time.Instant.ofEpochMilli(latestEntry.dateTime)
             val zoned = instant.atZone(java.time.ZoneId.systemDefault())
@@ -205,7 +211,12 @@ class AddEntryWidgetProvider : AppWidgetProvider() {
 
                 views.setTextViewText(R.id.widget_text_reading, formattedValue)
                 views.setTextViewText(R.id.widget_text_unit, prefs.glucoseUnit.displayLabel)
-                views.setTextViewText(R.id.widget_text_period, latestEntry.period.displayLabel)
+                val periodLabel = if (latestEntry.exerciseTiming != ExerciseTiming.NONE) {
+                    "${latestEntry.period.displayLabel} · ${latestEntry.exerciseTiming.displayLabel}"
+                } else {
+                    latestEntry.period.displayLabel
+                }
+                views.setTextViewText(R.id.widget_text_period, periodLabel)
 
                 val instant = java.time.Instant.ofEpochMilli(latestEntry.dateTime)
                 val zoned = instant.atZone(java.time.ZoneId.systemDefault())

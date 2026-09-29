@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +33,7 @@ import com.example.sugrnote.ui.overview.MealTimeStats
 import com.example.sugrnote.ui.overview.StatsPeriod
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AveragesByMealCard(
     mealTimePeriodStats: Map<StatsPeriod, StateFlow<MealTimeStats>>,
@@ -58,20 +62,22 @@ fun AveragesByMealCard(
             )
             Spacer(Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                StatsPeriod.entries.forEach { period ->
-                    FilterChip(
-                        selected = selectedPeriod == period,
+                StatsPeriod.entries.forEachIndexed { index, period ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = StatsPeriod.entries.size,
+                            baseShape = RoundedCornerShape(8.dp)
+                        ),
                         onClick = { selectedPeriod = period },
-                        label = { Text(period.label) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
+                        selected = selectedPeriod == period,
+                        icon = {}
+                    ) {
+                        Text(period.label)
+                    }
                 }
             }
 

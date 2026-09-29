@@ -17,12 +17,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -493,23 +496,52 @@ fun EntryScreen(
             }
             
             // Notes
+            var showNotes by remember { mutableStateOf(viewModel.notesText.isNotBlank()) }
+
+            LaunchedEffect(viewModel.notesText) {
+                if (viewModel.notesText.isNotBlank()) {
+                    showNotes = true
+                }
+            }
+
             Column {
-                Text("Notes", style = MaterialTheme.typography.labelLarge)
-                Spacer(Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = viewModel.notesText,
-                    onValueChange = { viewModel.onNotesChanged(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 5,
-                    supportingText = {
-                        Text(
-                            text = "${viewModel.notesText.length} / 254",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.End
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("Notes", style = MaterialTheme.typography.labelLarge)
+                    IconButton(
+                        onClick = { showNotes = !showNotes },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (showNotes) Icons.Default.Remove else Icons.Default.Add,
+                            contentDescription = if (showNotes) "Hide notes" else "Show notes",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
-                )
+                }
+
+                AnimatedVisibility(visible = showNotes) {
+                    Column {
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = viewModel.notesText,
+                            onValueChange = { viewModel.onNotesChanged(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3,
+                            maxLines = 5,
+                            supportingText = {
+                                Text(
+                                    text = "${viewModel.notesText.length} / 254",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.End
+                                )
+                            }
+                        )
+                    }
+                }
             }
         }
     }

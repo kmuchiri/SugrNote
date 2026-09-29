@@ -1,10 +1,10 @@
 package com.example.sugrnote.ui.overview.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.sugrnote.data.settings.UserPreferences
@@ -18,17 +18,11 @@ fun TrendsCard(
     selectedTimeRange: TimeRange,
     onTimeRangeSelected: (TimeRange) -> Unit,
     aggregatedData: TrendsData,
-    prefs: UserPreferences,
-    shadowColor: Color
+    prefs: UserPreferences
 ) {
     Card(
-        modifier = modifier
-            .shadow(
-                elevation = 8.dp,
-                shape = CardDefaults.shape,
-                ambientColor = shadowColor,
-                spotColor = shadowColor
-            ),
+        modifier = modifier,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )

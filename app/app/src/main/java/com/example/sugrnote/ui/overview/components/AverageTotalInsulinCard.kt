@@ -1,5 +1,6 @@
 package com.example.sugrnote.ui.overview.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.sugrnote.ui.overview.InsulinPeriodStats
@@ -39,20 +39,14 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun AverageTotalInsulinCard(
     insulinPeriodStats: Map<StatsPeriod, StateFlow<InsulinPeriodStats>>,
-    shadowColor: Color,
     modifier: Modifier = Modifier
 ) {
     var selectedPeriod by remember { mutableStateOf(StatsPeriod.DAYS_7) }
 
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 8.dp,
-                shape = CardDefaults.shape,
-                ambientColor = shadowColor,
-                spotColor = shadowColor
-            ),
+            .fillMaxWidth(),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )

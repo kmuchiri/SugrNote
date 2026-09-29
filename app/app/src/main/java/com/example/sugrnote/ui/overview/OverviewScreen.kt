@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,27 +44,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.DefaultShadowColor
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sugrnote.domain.model.GlucoseStatus
-import com.example.sugrnote.domain.util.GlucoseUnitConverter
-import com.example.sugrnote.ui.theme.StatusHigh
-import com.example.sugrnote.ui.theme.StatusInRange
-import com.example.sugrnote.ui.theme.StatusLow
-import java.time.Instant
-import java.time.ZoneId
-import com.example.sugrnote.domain.util.DateTimeUtils
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -91,10 +76,6 @@ fun OverviewScreen(
     val context = LocalContext.current
 
     val periods = StatsPeriod.entries
-    var selectedGlucosePeriod by remember { mutableStateOf(StatsPeriod.DAYS_7) }
-
-    val isDarkTheme = isSystemInDarkTheme()
-    val shadowColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f) else DefaultShadowColor
 
     Scaffold(
         topBar = {
@@ -131,37 +112,26 @@ fun OverviewScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val latestStatusColor = latestEntry?.let { entry ->
-                when (GlucoseStatus.fromValue(entry.glucoseMgDl, prefs.lowThresholdMgDl, prefs.highThresholdMgDl)) {
-                    GlucoseStatus.LOW -> StatusLow
-                    GlucoseStatus.IN_RANGE -> StatusInRange
-                    GlucoseStatus.HIGH -> StatusHigh
-                }
-            }
-            val latestCardBgColor = latestStatusColor ?: MaterialTheme.colorScheme.surface
-            val latestCardContentColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.onSurface
-            val latestCardVariantColor = if (latestStatusColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
-            val latestCardPrimaryColor = if (latestStatusColor != null) Color.White else MaterialTheme.colorScheme.primary
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 LatestReadingCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                     latestEntry = latestEntry,
                     prefs = prefs,
-                    shadowColor = shadowColor,
                     onEntryClick = onEntryClick
                 )
 
                 InsulinIntake24hCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                     insulinStats24h = insulinStats24h,
                     latestLongActingEntry = latestLongActingEntry,
                     latestShortActingEntry = latestShortActingEntry,
-                    prefs = prefs,
-                    shadowColor = shadowColor
+                    prefs = prefs
                 )
             }
 
@@ -170,15 +140,13 @@ fun OverviewScreen(
                 selectedTimeRange = selectedTimeRange,
                 onTimeRangeSelected = { trendsViewModel.setTimeRange(it) },
                 aggregatedData = aggregatedData,
-                prefs = prefs,
-                shadowColor = shadowColor
+                prefs = prefs
             )
 
             GlucoseAveragesCard(
                 modifier = Modifier.fillMaxWidth(),
                 periodStats = viewModel.periodStats,
-                prefs = prefs,
-                shadowColor = shadowColor
+                prefs = prefs
             )
 
             Spacer(Modifier.height(8.dp))
@@ -186,8 +154,7 @@ fun OverviewScreen(
             AveragesByMealCard(
                 modifier = Modifier.fillMaxWidth(),
                 mealTimePeriodStats = viewModel.mealTimePeriodStats,
-                prefs = prefs,
-                shadowColor = shadowColor
+                prefs = prefs
             )
 
             Spacer(Modifier.height(8.dp))
@@ -195,8 +162,7 @@ fun OverviewScreen(
             if (latestLongActingEntry != null || latestShortActingEntry != null || insulinStats24h.total > 0f) {
                 AverageTotalInsulinCard(
                     modifier = Modifier.fillMaxWidth(),
-                    insulinPeriodStats = viewModel.insulinPeriodStats,
-                    shadowColor = shadowColor
+                    insulinPeriodStats = viewModel.insulinPeriodStats
                 )
             }
         }

@@ -51,9 +51,13 @@ Browse your complete history organized chronologically by day. Switch seamlessly
 
 Stay connected to your latest reading without opening the app. A persistent, color-coded notification in your status shade reflects your current glycemic range (green for in-range, red for low, amber for high). A glanceable home screen widget provides an instant snapshot and a one-tap shortcut to log new readings on the go.
 
-### 🎨 Personalization & Total Privacy
+### 🎨 Personalization
 
-Customize your target blood glucose thresholds, choose between 12-hour and 24-hour clocks, select your preferred date format, and switch between Light, Dark, or battery-friendly OLED true-black themes. Best of all, all data is stored exclusively on your device in a secure local database—your medical data belongs to you.
+Customize your target blood glucose thresholds, choose between 12-hour and 24-hour clocks, select your preferred date format, and switch between Light, Dark, or battery-friendly OLED true-black themes.
+
+### 🔒 Offline-first
+
+All data is stored exclusively on your device in a local database.
 
 ---
 

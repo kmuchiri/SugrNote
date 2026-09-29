@@ -15,17 +15,11 @@
 
 SugrNote is a simple personal diabetes management companion built to make daily tracking effortless, informative, and private. It gives you a clear picture of how food, insulin, and activity affect your glucose levels over time.
 
----
-
-## 📱 Screenshots
-
 | Overview Dashboard | Logbook History | Add / Edit Entry |
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/Screenshot_20260929-152150.png" width="260" alt="Overview Dashboard" /> | <img src="docs/screenshots/Screenshot_20260929-152158.png" width="260" alt="Logbook History" /> | <img src="docs/screenshots/Screenshot_20260929-152141.png" width="260" alt="Add / Edit Entry" /> |
 
----
-
-## What SugrNote Does
+## Features
 
 ### 🩸 Fast & Reliable Glucose Logging
 
@@ -59,8 +53,6 @@ Customize your target blood glucose thresholds, choose between 12-hour and 24-ho
 
 All data is stored exclusively on your device in a local database.
 
----
-
 ## Application Structure
 
 SugrNote is organized into four main areas:
@@ -70,8 +62,6 @@ SugrNote is organized into four main areas:
 - **Entry Form**: A clean, unified form for quickly logging blood sugar, meal periods, insulin units, carbs, exercise, and notes.
 - **You & Settings**: Personal preferences for units (mg/dL vs. mmol/L), target thresholds, date and time styles, and appearance themes.
 
----
-
 ## Upcoming Roadmap
 
 Upcoming development priorities are documented in detail in **[docs/roadmap.md](docs/roadmap.md)**:
@@ -80,15 +70,11 @@ Upcoming development priorities are documented in detail in **[docs/roadmap.md](
 - **Medical Reports & Data Export**
 - **Smart Reminders**
 
----
-
 ## Architecture & Tech Stack
 
 SugrNote is built following modern Android best practices using Kotlin and Jetpack Compose for a reactive, single-activity user interface. It utilizes Clean Architecture with MVVM, Coroutines, and StateFlow for unidirectional data flow. Persistence is handled on-device using a Room SQLite database and Jetpack DataStore Preferences. It targets Android SDK 36 with a minimum compatibility of Android 11 (API 30).
 
 Detailed technical documentation and database schemas are available in **[docs/README.md](docs/README.md)**.
-
----
 
 ## 📥 Getting Started
 
@@ -110,8 +96,6 @@ cd SugrNote/app
 # Run tests
 ./gradlew testDebugUnitTest
 ```
-
----
 
 ## 📄 License
 

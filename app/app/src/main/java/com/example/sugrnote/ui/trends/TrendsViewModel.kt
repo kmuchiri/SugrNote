@@ -78,7 +78,9 @@ class TrendsViewModel(
                     val averageMgDl = bucketList.average().toFloat()
                     // Convert the average to the user's preferred unit
                     val convertedStr = GlucoseUnitConverter.format(averageMgDl, prefs.glucoseUnit)
-                    convertedStr.toFloatOrNull()
+                    convertedStr.toFloatOrNull()?.let { value ->
+                        BucketData(value = value, count = bucketList.size)
+                    }
                 }
             }
         )

@@ -121,8 +121,8 @@ fun TrendsGraph(
 
     val (dataMax, dataMin) = when (data) {
         is TrendsData.Aggregated -> {
-            val max = data.buckets.filterNotNull().maxOrNull() ?: highThreshold
-            val min = data.buckets.filterNotNull().minOrNull() ?: lowThreshold
+            val max = data.buckets.filterNotNull().maxOfOrNull { it.value } ?: highThreshold
+            val min = data.buckets.filterNotNull().minOfOrNull { it.value } ?: lowThreshold
             Pair(max, min)
         }
         is TrendsData.Raw -> {
@@ -251,17 +251,18 @@ fun TrendsGraph(
             val path = Path()
             var isFirst = true
             for (i in 0 until buckets) {
-                val value = displayData.getOrNull(i)
-                if (value != null) {
+                val bucket = displayData.getOrNull(i)
+                if (bucket != null) {
                     val xPos = xPadding + (i * bucketWidth)
-                    val yPos = graphHeight - ((value - yMin) / yRange * graphHeight)
+                    val yPos = graphHeight - ((bucket.value - yMin) / yRange * graphHeight)
                     if (isFirst) {
                         path.moveTo(xPos, yPos)
                         isFirst = false
                     } else {
                         path.lineTo(xPos, yPos)
                     }
-                    drawCircle(color = color, radius = 6f, center = Offset(xPos, yPos))
+                    val pointColor = if (bucket.count == 1) Color.LightGray else color
+                    drawCircle(color = pointColor, radius = 6f, center = Offset(xPos, yPos))
                 }
             }
             if (!isFirst) {

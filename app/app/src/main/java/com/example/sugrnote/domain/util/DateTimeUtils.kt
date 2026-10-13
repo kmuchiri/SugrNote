@@ -48,4 +48,19 @@ object DateTimeUtils {
         }
         return "$dayLabel • $time"
     }
+
+    fun formatDisplayDateTime(date: LocalDate, time: LocalTime, prefs: UserPreferences): String {
+        val today = LocalDate.now()
+        val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(date, today)
+        val timeStr = formatTime(time, prefs)
+
+        val dayLabel = when {
+            daysBetween == 0L -> "Today"
+            daysBetween == 1L -> "Yesterday"
+            daysBetween == -1L -> "Tomorrow"
+            daysBetween in 2L..6L -> "$daysBetween days ago"
+            else -> formatDate(date, prefs)
+        }
+        return "$dayLabel, $timeStr"
+    }
 }

@@ -3,13 +3,16 @@ package com.example.sugrnote.ui.entry
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,18 +22,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -40,15 +45,14 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,20 +62,102 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.model.ExerciseTiming
-import com.example.sugrnote.domain.model.Period
-import java.time.Instant
-import java.time.LocalTime
-import java.time.ZoneOffset
+import com.example.sugrnote.domain.model.InsulinType
 import com.example.sugrnote.domain.util.DateTimeUtils
 import com.example.sugrnote.ui.overview.MyCustomFontFamily
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+/**
+ * Compact outlined text field with reduced vertical height (42dp) and tight content padding
+ * to eliminate wasted vertical space.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CompactOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    height: androidx.compose.ui.unit.Dp = 42.dp,
+    placeholder: String? = null,
+    trailingText: String? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val colors = OutlinedTextFieldDefaults.colors()
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.height(height),
+        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
+        readOnly = readOnly,
+        interactionSource = interactionSource,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = singleLine,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                isError = isError,
+                placeholder = placeholder?.let {
+                    {
+                        Text(
+                            text = it,
+                            style = textStyle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                },
+                trailingIcon = when {
+                    trailingIcon != null -> trailingIcon
+                    trailingText != null -> {
+                        {
+                            Text(
+                                text = trailingText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 12.dp)
+                            )
+                        }
+                    }
+                    else -> null
+                },
+                contentPadding = contentPadding,
+                container = {
+                    OutlinedTextFieldDefaults.Container(
+                        enabled = true,
+                        isError = isError,
+                        interactionSource = interactionSource,
+                        colors = colors,
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryScreen(
     viewModel: EntryViewModel,
@@ -87,8 +173,7 @@ fun EntryScreen(
         }
     }
 
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var showDateTimePicker by remember { mutableStateOf(false) }
 
     if (viewModel.showUnusualValueDialog) {
         AlertDialog(
@@ -108,65 +193,30 @@ fun EntryScreen(
         )
     }
 
-    if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = viewModel.date
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-                .toEpochMilli()
-        )
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val selected = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneOffset.UTC)
-                            .toLocalDate()
-                        viewModel.onDateChanged(selected)
-                    }
-                    showDatePicker = false
-                }) { Text("OK") }
+    // Zero-style 3-column scrollable drum/wheel picker bottom sheet
+    if (showDateTimePicker) {
+        DateTimeWheelPickerSheet(
+            initialDate = viewModel.date,
+            initialTime = viewModel.time,
+            is24Hour = prefs.is24HourClock,
+            onConfirm = { date, time ->
+                viewModel.onDateChanged(date)
+                viewModel.onTimeChanged(time)
+                showDateTimePicker = false
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    if (showTimePicker) {
-        val timePickerState = rememberTimePickerState(
-            initialHour = viewModel.time.hour,
-            initialMinute = viewModel.time.minute
-        )
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.onTimeChanged(
-                        LocalTime.of(timePickerState.hour, timePickerState.minute)
-                    )
-                    showTimePicker = false
-                }) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
-            },
-            text = { TimePicker(state = timePickerState) }
+            onDismiss = { showDateTimePicker = false }
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         "Edit Sugr Note",
                         fontFamily = MyCustomFontFamily,
                         fontSize = 20.sp
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -182,7 +232,7 @@ fun EntryScreen(
             )
         },
         bottomBar = {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -202,258 +252,390 @@ fun EntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 12.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // 1. Consolidated Date & Time entry (Zero app style)
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDateTimePicker = true }
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Date", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = DateTimeUtils.formatDate(viewModel.date, prefs),
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            IconButton(onClick = { showDatePicker = true }) {
-                                Icon(Icons.Default.CalendarToday, "Select date")
-                            }
-                        }
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Time", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = DateTimeUtils.formatTime(viewModel.time, prefs),
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            IconButton(onClick = { showTimePicker = true }) {
-                                Icon(Icons.Default.Schedule, "Select time")
-                            }
-                        }
-                    )
-                }
-            }
-
-            // Glucose value
-            Text(
-                "Glucose (${prefs.glucoseUnit.displayLabel})",
-                style = MaterialTheme.typography.labelLarge
-            )
-            OutlinedTextField(
-                value = viewModel.glucoseValueText,
-                onValueChange = { viewModel.onGlucoseValueChanged(it) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                isError = viewModel.glucoseError != null,
-                supportingText = viewModel.glucoseError?.let { { Text(it) } },
-                singleLine = true
-            )
-
-            // Period selection
-            Text("Period", style = MaterialTheme.typography.labelLarge)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                BasePeriod.entries.forEach { p ->
-                    FilterChip(
-                        selected = viewModel.basePeriod == p,
-                        onClick = { viewModel.onBasePeriodChanged(p) },
-                        label = { Text(p.displayLabel) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
-                }
-            }
-
-            // Meal Type (conditional)
-            AnimatedVisibility(
-                visible = viewModel.basePeriod == BasePeriod.BEFORE_MEAL ||
-                        viewModel.basePeriod == BasePeriod.AFTER_MEAL
-            ) {
-                Column {
-                    Text("Meal", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        MealType.entries.forEach { m ->
-                            FilterChip(
-                                selected = viewModel.mealType == m,
-                                onClick = { viewModel.onMealTypeChanged(m) },
-                                label = { Text(m.displayLabel) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                                )
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                    CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
+                        Column {
+                            Text(
+                                text = "LOGGED AT",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                letterSpacing = 0.8.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = DateTimeUtils.formatDisplayDateTime(viewModel.date, viewModel.time, prefs),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { showDateTimePicker = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text(
+                            "Edit",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
 
-            // Exercise Timing (independent of period)
-            Text("Exercise", style = MaterialTheme.typography.labelLarge)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ExerciseTiming.entries.forEach { timing ->
-                    FilterChip(
-                        selected = viewModel.exerciseTiming == timing,
-                        onClick = { viewModel.onExerciseTimingChanged(timing) },
-                        label = { Text(timing.displayLabel) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
+            // 2. Glucose Reading Input (Slightly larger primary entry)
+            Column {
+                Text(
+                    "Glucose (${prefs.glucoseUnit.displayLabel})",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(6.dp))
+                CompactOutlinedTextField(
+                    value = viewModel.glucoseValueText,
+                    onValueChange = { viewModel.onGlucoseValueChanged(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    height = 48.dp,
+                    textStyle = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    isError = viewModel.glucoseError != null,
+                    singleLine = true
+                )
+                if (viewModel.glucoseError != null) {
+                    Text(
+                        text = viewModel.glucoseError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                     )
                 }
             }
 
-            // Exercise Details (conditional on Before Exercise)
-            AnimatedVisibility(
-                visible = viewModel.exerciseTiming == ExerciseTiming.BEFORE_EXERCISE
+            // 3. Period & Meal Dropdown Selection (Default: Random, No Horizontal Scroll)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Column(modifier = Modifier.weight(1.5f)) {
-                        Text("Intensity", style = MaterialTheme.typography.labelLarge)
-                        Spacer(Modifier.height(4.dp))
-                        var expanded by remember { mutableStateOf(false) }
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = it }
+                // Period Dropdown
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Period",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    var periodExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = periodExpanded,
+                        onExpandedChange = { periodExpanded = it }
+                    ) {
+                        CompactOutlinedTextField(
+                            value = viewModel.basePeriod.displayLabel,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = periodExpanded) },
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = periodExpanded,
+                            onDismissRequest = { periodExpanded = false }
                         ) {
-                            OutlinedTextField(
-                                value = viewModel.exerciseIntensity,
+                            listOf(
+                                BasePeriod.RANDOM,
+                                BasePeriod.FASTING,
+                                BasePeriod.BEFORE_MEAL,
+                                BasePeriod.AFTER_MEAL,
+                                BasePeriod.BEFORE_SLEEP
+                            ).forEach { p ->
+                                DropdownMenuItem(
+                                    text = { Text(p.displayLabel) },
+                                    onClick = {
+                                        viewModel.onBasePeriodChanged(p)
+                                        periodExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Meal Dropdown (Visible only when Before Meal or After Meal is selected)
+                if (viewModel.basePeriod == BasePeriod.BEFORE_MEAL || viewModel.basePeriod == BasePeriod.AFTER_MEAL) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Meal",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        var mealExpanded by remember { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
+                            expanded = mealExpanded,
+                            onExpandedChange = { mealExpanded = it }
+                        ) {
+                            CompactOutlinedTextField(
+                                value = viewModel.mealType.displayLabel,
                                 onValueChange = {},
                                 readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                                singleLine = true
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = mealExpanded) },
+                                modifier = Modifier
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth()
                             )
                             ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
+                                expanded = mealExpanded,
+                                onDismissRequest = { mealExpanded = false }
                             ) {
-                                listOf("Light", "Moderate", "Intense").forEach { selectionOption ->
+                                MealType.entries.forEach { m ->
                                     DropdownMenuItem(
-                                        text = { Text(selectionOption) },
+                                        text = { Text(m.displayLabel) },
                                         onClick = {
-                                            viewModel.onExerciseIntensityChanged(selectionOption)
-                                            expanded = false
+                                            viewModel.onMealTypeChanged(m)
+                                            mealExpanded = false
                                         }
                                     )
                                 }
                             }
                         }
                     }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Duration (mins)", style = MaterialTheme.typography.labelLarge)
-                        Spacer(Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = viewModel.exerciseDurationText,
-                            onValueChange = { viewModel.onExerciseDurationChanged(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            isError = viewModel.exerciseDurationError != null,
-                            supportingText = viewModel.exerciseDurationError?.let { { Text(it) } },
-                            singleLine = true
-                        )
-                    }
                 }
             }
 
-            // Insulin type
-            Text("Insulin", style = MaterialTheme.typography.labelLarge)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                InsulinType.entries.forEach { type ->
-                    FilterChip(
-                        selected = viewModel.insulinType == type,
-                        onClick = { viewModel.onInsulinTypeChanged(type) },
-                        label = { Text(type.displayLabel) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
-                }
-            }
-
-            // Insulin units (conditional)
-            AnimatedVisibility(
-                visible = viewModel.insulinType != InsulinType.NONE
-            ) {
+            // 4. Exercise Timing (3 Chips spanning width without scroll)
+            Column {
+                Text(
+                    "Exercise",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (viewModel.insulinType == InsulinType.LONG_ACTING || viewModel.insulinType == InsulinType.BOTH) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Long Acting units", style = MaterialTheme.typography.labelLarge)
-                            Spacer(Modifier.height(4.dp))
-                            OutlinedTextField(
-                                value = viewModel.longActingUnitsText,
-                                onValueChange = { viewModel.onLongActingUnitsChanged(it) },
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                isError = viewModel.longActingError != null,
-                                supportingText = viewModel.longActingError?.let { { Text(it) } },
-                                singleLine = true
+                    ExerciseTiming.entries.forEach { timing ->
+                        FilterChip(
+                            selected = viewModel.exerciseTiming == timing,
+                            onClick = { viewModel.onExerciseTimingChanged(timing) },
+                            label = { Text(timing.displayLabel, style = MaterialTheme.typography.labelMedium) },
+                            modifier = Modifier.height(36.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                             )
-                        }
+                        )
                     }
+                }
 
-                    if (viewModel.insulinType == InsulinType.SHORT_ACTING || viewModel.insulinType == InsulinType.BOTH) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Short Acting units", style = MaterialTheme.typography.labelLarge)
+                // Conditional Exercise Details
+                AnimatedVisibility(visible = viewModel.exerciseTiming == ExerciseTiming.BEFORE_EXERCISE) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1.3f)) {
+                            Text("Intensity", style = MaterialTheme.typography.labelSmall)
                             Spacer(Modifier.height(4.dp))
-                            OutlinedTextField(
-                                value = viewModel.shortActingUnitsText,
-                                onValueChange = { viewModel.onShortActingUnitsChanged(it) },
+                            var intensityExpanded by remember { mutableStateOf(false) }
+                            ExposedDropdownMenuBox(
+                                expanded = intensityExpanded,
+                                onExpandedChange = { intensityExpanded = it }
+                            ) {
+                                CompactOutlinedTextField(
+                                    value = viewModel.exerciseIntensity,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = intensityExpanded) },
+                                    modifier = Modifier
+                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                        .fillMaxWidth()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = intensityExpanded,
+                                    onDismissRequest = { intensityExpanded = false }
+                                ) {
+                                    listOf("Light", "Moderate", "Intense").forEach { opt ->
+                                        DropdownMenuItem(
+                                            text = { Text(opt) },
+                                            onClick = {
+                                                viewModel.onExerciseIntensityChanged(opt)
+                                                intensityExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Duration (mins)", style = MaterialTheme.typography.labelSmall)
+                            Spacer(Modifier.height(4.dp))
+                            CompactOutlinedTextField(
+                                value = viewModel.exerciseDurationText,
+                                onValueChange = { viewModel.onExerciseDurationChanged(it) },
                                 modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                isError = viewModel.shortActingError != null,
-                                supportingText = viewModel.shortActingError?.let { { Text(it) } },
-                                singleLine = true
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                isError = viewModel.exerciseDurationError != null
                             )
+                            if (viewModel.exerciseDurationError != null) {
+                                Text(
+                                    text = viewModel.exerciseDurationError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // Food and Carb amount
+            // 5. Insulin Type (4 Chips spanning width without scroll)
+            Column {
+                Text(
+                    "Insulin",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    InsulinType.entries.forEach { type ->
+                        FilterChip(
+                            selected = viewModel.insulinType == type,
+                            onClick = { viewModel.onInsulinTypeChanged(type) },
+                            label = { Text(type.displayLabel, style = MaterialTheme.typography.labelMedium) },
+                            modifier = Modifier.height(36.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                }
+
+                // Conditional Insulin Units (Side-by-side)
+                AnimatedVisibility(visible = viewModel.insulinType != InsulinType.NONE) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (viewModel.insulinType == InsulinType.LONG_ACTING || viewModel.insulinType == InsulinType.BOTH) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Long Acting units", style = MaterialTheme.typography.labelSmall)
+                                Spacer(Modifier.height(4.dp))
+                                CompactOutlinedTextField(
+                                    value = viewModel.longActingUnitsText,
+                                    onValueChange = { viewModel.onLongActingUnitsChanged(it) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    isError = viewModel.longActingError != null
+                                )
+                                if (viewModel.longActingError != null) {
+                                    Text(
+                                        text = viewModel.longActingError!!,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        if (viewModel.insulinType == InsulinType.SHORT_ACTING || viewModel.insulinType == InsulinType.BOTH) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Short Acting units", style = MaterialTheme.typography.labelSmall)
+                                Spacer(Modifier.height(4.dp))
+                                CompactOutlinedTextField(
+                                    value = viewModel.shortActingUnitsText,
+                                    onValueChange = { viewModel.onShortActingUnitsChanged(it) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    isError = viewModel.shortActingError != null
+                                )
+                                if (viewModel.shortActingError != null) {
+                                    Text(
+                                        text = viewModel.shortActingError!!,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6. Food & Carb amount (Side-by-side Row)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Food", style = MaterialTheme.typography.labelLarge)
-                    Spacer(Modifier.height(4.dp))
+                    Text("Food", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = viewModel.hasFood,
                             onClick = { viewModel.onHasFoodChanged(true) },
-                            label = { Text("Yes") },
+                            label = { Text("Yes", style = MaterialTheme.typography.labelMedium) },
+                            modifier = Modifier.height(36.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
@@ -462,7 +644,8 @@ fun EntryScreen(
                         FilterChip(
                             selected = !viewModel.hasFood,
                             onClick = { viewModel.onHasFoodChanged(false) },
-                            label = { Text("No") },
+                            label = { Text("No", style = MaterialTheme.typography.labelMedium) },
+                            modifier = Modifier.height(36.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
@@ -479,23 +662,30 @@ fun EntryScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column {
-                            Text("Carb amount (g)", style = MaterialTheme.typography.labelLarge)
-                            Spacer(Modifier.height(4.dp))
-                            OutlinedTextField(
+                            Text("Carb amount (g)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
+                            Spacer(Modifier.height(6.dp))
+                            CompactOutlinedTextField(
                                 value = viewModel.carbAmountText,
                                 onValueChange = { viewModel.onCarbAmountChanged(it) },
                                 modifier = Modifier.fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 isError = viewModel.carbError != null,
-                                supportingText = viewModel.carbError?.let { { Text(it) } },
                                 singleLine = true
                             )
+                            if (viewModel.carbError != null) {
+                                Text(
+                                    text = viewModel.carbError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
-            
-            // Notes
+
+            // 7. Notes (Collapsible)
             var showNotes by remember { mutableStateOf(viewModel.notesText.isNotBlank()) }
 
             LaunchedEffect(viewModel.notesText) {
@@ -509,10 +699,10 @@ fun EntryScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Notes", style = MaterialTheme.typography.labelLarge)
+                    Text("Notes", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     IconButton(
                         onClick = { showNotes = !showNotes },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
                             imageVector = if (showNotes) Icons.Default.Remove else Icons.Default.Add,
@@ -525,13 +715,14 @@ fun EntryScreen(
 
                 AnimatedVisibility(visible = showNotes) {
                     Column {
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(6.dp))
                         OutlinedTextField(
                             value = viewModel.notesText,
                             onValueChange = { viewModel.onNotesChanged(it) },
                             modifier = Modifier.fillMaxWidth(),
-                            minLines = 3,
-                            maxLines = 5,
+                            minLines = 2,
+                            maxLines = 4,
+                            placeholder = { Text("Add notes...", style = MaterialTheme.typography.bodyMedium) },
                             supportingText = {
                                 Text(
                                     text = "${viewModel.notesText.length} / 254",
@@ -543,6 +734,8 @@ fun EntryScreen(
                     }
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
         }
     }
 }

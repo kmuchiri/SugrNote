@@ -2,8 +2,6 @@ package com.example.sugrnote.ui.entry
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.SnapPosition
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -29,14 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -47,8 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -56,111 +47,75 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 /**
- * A single scrollable wheel column with center-aligned snapping.
+ * A single scrollable wheel column built using VerticalPager for deterministic,
+ * synchronous page selection with center alignment.
  */
 @Composable
 fun <T> WheelColumn(
     items: List<T>,
-    initialIndex: Int,
-    onItemSelected: (index: Int, item: T) -> Unit,
+    state: PagerState,
     modifier: Modifier = Modifier,
     visibleItemCount: Int = 5,
     itemHeight: Dp = 44.dp,
     formatItem: (T) -> String = { it.toString() }
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val safeInitialIndex = initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
-    val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = safeInitialIndex)
-    val snapFlingBehavior = rememberSnapFlingBehavior(
-        lazyListState = lazyListState,
-        snapPosition = SnapPosition.Center
-    )
-
     val halfVisible = visibleItemCount / 2
 
-    // Determine the centered item index based on viewport center offset
-    val selectedIndex by remember {
-        derivedStateOf {
-            val layoutInfo = lazyListState.layoutInfo
-            if (layoutInfo.visibleItemsInfo.isEmpty()) {
-                safeInitialIndex
-            } else {
-                val centerOffset = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-                val closest = layoutInfo.visibleItemsInfo.minByOrNull { item ->
-                    val itemCenter = item.offset + item.size / 2
-                    kotlin.math.abs(itemCenter - centerOffset)
-                }
-                closest?.index?.coerceIn(0, items.size - 1) ?: safeInitialIndex
-            }
-        }
-    }
-
-    // Emit selection when scrolling ends
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.isScrollInProgress }
-            .filter { !it }
-            .distinctUntilChanged()
-            .collect {
-                if (selectedIndex in items.indices) {
-                    onItemSelected(selectedIndex, items[selectedIndex])
-                }
-            }
-    }
-
-    LazyColumn(
-        state = lazyListState,
-        flingBehavior = snapFlingBehavior,
+    VerticalPager(
+        state = state,
+        pageSize = PageSize.Fixed(itemHeight),
         contentPadding = PaddingValues(vertical = itemHeight * halfVisible),
         modifier = modifier.height(itemHeight * visibleItemCount),
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        itemsIndexed(items) { index, item ->
-            val isSelected = index == selectedIndex
-            val distance = kotlin.math.abs(index - selectedIndex)
+    ) { page ->
+        val isSelected = page == state.currentPage
+        val distance = kotlin.math.abs(page - state.currentPage)
 
-            val textAlpha = when (distance) {
-                0 -> 1f
-                1 -> 0.55f
-                2 -> 0.28f
-                else -> 0.12f
-            }
+        val textAlpha = when (distance) {
+            0 -> 1f
+            1 -> 0.55f
+            2 -> 0.28f
+            else -> 0.12f
+        }
 
-            val fontSize = when (distance) {
-                0 -> 19.sp
-                1 -> 16.sp
-                else -> 14.sp
-            }
+        val fontSize = when (distance) {
+            0 -> 19.sp
+            1 -> 16.sp
+            else -> 14.sp
+        }
 
-            val fontStyle = if (distance > 0) FontStyle.Italic else FontStyle.Normal
-            val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        val fontStyle = if (distance > 0) FontStyle.Italic else FontStyle.Normal
+        val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(itemHeight)
-                    .clickable {
-                        coroutineScope.launch {
-                            lazyListState.animateScrollToItem(index)
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = formatItem(item),
-                    fontSize = fontSize,
-                    fontWeight = fontWeight,
-                    fontStyle = fontStyle,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
-                )
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(itemHeight)
+                .clickable {
+                    coroutineScope.launch {
+                        state.animateScrollToPage(page)
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = formatItem(items[page]),
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                fontStyle = fontStyle,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
     }
 }
 
 /**
- * Zero-app inspired 3-column (or 4-column) scrollable drum/wheel picker inside a ModalBottomSheet.
+ * Zero-app inspired scrollable drum/wheel picker bottom sheet.
+ * Only allows past dates up to Today (no tomorrow/future dates).
+ * Restricts time to current or past when Today is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -172,45 +127,60 @@ fun DateTimeWheelPickerSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val today = remember { LocalDate.now() }
+    val now = remember { LocalTime.now() }
 
-    // Dates range: 60 days in the past up to 7 days ahead
+    // Dates range: past 60 days up to today (NO FUTURE DATES)
     val dates = remember {
-        (-60..7).map { LocalDate.now().plusDays(it.toLong()) }
-    }
-    val initialDateIndex = remember {
-        dates.indexOf(initialDate).takeIf { it >= 0 } ?: dates.indexOf(LocalDate.now()).coerceAtLeast(0)
+        (-60..0).map { today.plusDays(it.toLong()) }
     }
 
-    var selectedDate by remember { mutableStateOf(initialDate) }
+    val safeInitialDate = remember(initialDate) {
+        if (initialDate.isAfter(today)) today else initialDate
+    }
+    val initialDateIndex = remember(safeInitialDate) {
+        val idx = dates.indexOf(safeInitialDate)
+        if (idx >= 0) idx else dates.lastIndex
+    }
 
-    // Time representation
+    val safeInitialTime = remember(initialTime, safeInitialDate) {
+        if (safeInitialDate >= today && initialTime.isAfter(now)) now else initialTime
+    }
+
+    // Minutes
     val minutes = remember { (0..59).toList() }
-    val initialMinuteIndex = remember { initialTime.minute.coerceIn(0, 59) }
-    var selectedMinute by remember { mutableIntStateOf(initialTime.minute) }
+    val initialMinuteIndex = remember(safeInitialTime) { safeInitialTime.minute.coerceIn(0, 59) }
 
     // Hours
-    val isPm = initialTime.hour >= 12
-    var selectedIsPm by remember { mutableStateOf(isPm) }
-
+    val isPm = safeInitialTime.hour >= 12
     val hours24 = remember { (0..23).toList() }
     val hours12 = remember { (1..12).toList() }
 
-    val initialHour24Index = remember { initialTime.hour.coerceIn(0, 23) }
-    val initialHour12Index = remember {
-        val h12 = when (val h = initialTime.hour % 12) {
+    val initialHour24Index = remember(safeInitialTime) { safeInitialTime.hour.coerceIn(0, 23) }
+    val initialHour12Index = remember(safeInitialTime) {
+        val h12 = when (val h = safeInitialTime.hour % 12) {
             0 -> 12
             else -> h
         }
         hours12.indexOf(h12).coerceAtLeast(0)
     }
 
-    var selectedHour24 by remember { mutableIntStateOf(initialTime.hour) }
-    var selectedHour12 by remember {
-        val h12 = when (val h = initialTime.hour % 12) {
-            0 -> 12
-            else -> h
+    // Pager states
+    val datePagerState = rememberPagerState(initialPage = initialDateIndex) { dates.size }
+    val minutePagerState = rememberPagerState(initialPage = initialMinuteIndex) { minutes.size }
+    val hour24PagerState = rememberPagerState(initialPage = initialHour24Index) { hours24.size }
+    val hour12PagerState = rememberPagerState(initialPage = initialHour12Index) { hours12.size }
+    val amPmPagerState = rememberPagerState(initialPage = if (isPm) 1 else 0) { 2 }
+
+    // If on Today and the selected hour is in the future, gently scroll back to current hour
+    LaunchedEffect(datePagerState.currentPage, hour24PagerState.currentPage) {
+        val isToday = datePagerState.currentPage == dates.lastIndex
+        if (isToday) {
+            val currentNow = LocalTime.now()
+            if (is24Hour && hour24PagerState.currentPage > currentNow.hour) {
+                hour24PagerState.animateScrollToPage(currentNow.hour)
+            }
         }
-        mutableIntStateOf(h12)
     }
 
     val itemHeight = 44.dp
@@ -271,9 +241,8 @@ fun DateTimeWheelPickerSheet(
                     // Date Column
                     WheelColumn(
                         items = dates,
-                        initialIndex = initialDateIndex,
-                        onItemSelected = { _, date -> selectedDate = date },
-                        formatItem = { formatWheelDate(it) },
+                        state = datePagerState,
+                        formatItem = { formatWheelDate(it, today) },
                         itemHeight = itemHeight,
                         visibleItemCount = visibleItemCount,
                         modifier = Modifier.weight(if (is24Hour) 1.8f else 1.5f)
@@ -283,8 +252,7 @@ fun DateTimeWheelPickerSheet(
                         // 24-hour hour column
                         WheelColumn(
                             items = hours24,
-                            initialIndex = initialHour24Index,
-                            onItemSelected = { _, h -> selectedHour24 = h },
+                            state = hour24PagerState,
                             formatItem = { "%02d".format(it) },
                             itemHeight = itemHeight,
                             visibleItemCount = visibleItemCount,
@@ -294,8 +262,7 @@ fun DateTimeWheelPickerSheet(
                         // 12-hour hour column
                         WheelColumn(
                             items = hours12,
-                            initialIndex = initialHour12Index,
-                            onItemSelected = { _, h -> selectedHour12 = h },
+                            state = hour12PagerState,
                             formatItem = { "%d".format(it) },
                             itemHeight = itemHeight,
                             visibleItemCount = visibleItemCount,
@@ -306,8 +273,7 @@ fun DateTimeWheelPickerSheet(
                     // Minute column
                     WheelColumn(
                         items = minutes,
-                        initialIndex = initialMinuteIndex,
-                        onItemSelected = { _, m -> selectedMinute = m },
+                        state = minutePagerState,
                         formatItem = { "%02d".format(it) },
                         itemHeight = itemHeight,
                         visibleItemCount = visibleItemCount,
@@ -319,8 +285,7 @@ fun DateTimeWheelPickerSheet(
                         val amPmList = remember { listOf("AM", "PM") }
                         WheelColumn(
                             items = amPmList,
-                            initialIndex = if (isPm) 1 else 0,
-                            onItemSelected = { _, str -> selectedIsPm = (str == "PM") },
+                            state = amPmPagerState,
                             formatItem = { it },
                             itemHeight = itemHeight,
                             visibleItemCount = visibleItemCount,
@@ -366,16 +331,30 @@ fun DateTimeWheelPickerSheet(
             // Primary Update Button
             Button(
                 onClick = {
-                    val finalHour = if (is24Hour) {
-                        selectedHour24
+                    val selectedDate = dates[datePagerState.currentPage.coerceIn(dates.indices)]
+                    val selectedMinute = minutes[minutePagerState.currentPage.coerceIn(minutes.indices)]
+                    val selectedHour = if (is24Hour) {
+                        hours24[hour24PagerState.currentPage.coerceIn(hours24.indices)]
                     } else {
+                        val h12 = hours12[hour12PagerState.currentPage.coerceIn(hours12.indices)]
+                        val isSelectedPm = amPmPagerState.currentPage == 1
                         when {
-                            selectedIsPm && selectedHour12 < 12 -> selectedHour12 + 12
-                            !selectedIsPm && selectedHour12 == 12 -> 0
-                            else -> selectedHour12
+                            isSelectedPm && h12 < 12 -> h12 + 12
+                            !isSelectedPm && h12 == 12 -> 0
+                            else -> h12
                         }
                     }
-                    val finalTime = LocalTime.of(finalHour.coerceIn(0, 23), selectedMinute.coerceIn(0, 59))
+
+                    val currentNow = LocalTime.now()
+                    val candidateTime = LocalTime.of(selectedHour.coerceIn(0, 23), selectedMinute.coerceIn(0, 59))
+
+                    // User can only log current time and time past
+                    val finalTime = if (selectedDate == today && candidateTime.isAfter(currentNow)) {
+                        currentNow
+                    } else {
+                        candidateTime
+                    }
+
                     onConfirm(selectedDate, finalTime)
                 },
                 modifier = Modifier
@@ -397,7 +376,6 @@ fun DateTimeWheelPickerSheet(
  * Format relative dates for the wheel picker:
  * - "Today"
  * - "Yesterday"
- * - "Tomorrow"
  * - "Mon 12 Oct"
  */
 private fun formatWheelDate(date: LocalDate, today: LocalDate = LocalDate.now()): String {
@@ -405,7 +383,6 @@ private fun formatWheelDate(date: LocalDate, today: LocalDate = LocalDate.now())
     return when (diff) {
         0L -> "Today"
         1L -> "Yesterday"
-        -1L -> "Tomorrow"
         else -> date.format(DateTimeFormatter.ofPattern("EEE d MMM"))
     }
 }

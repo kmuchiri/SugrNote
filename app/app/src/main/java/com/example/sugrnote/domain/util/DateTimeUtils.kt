@@ -57,7 +57,6 @@ object DateTimeUtils {
         val dayLabel = when {
             daysBetween == 0L -> "Today"
             daysBetween == 1L -> "Yesterday"
-            daysBetween == -1L -> "Tomorrow"
             daysBetween in 2L..6L -> "$daysBetween days ago"
             else -> formatDate(date, prefs)
         }

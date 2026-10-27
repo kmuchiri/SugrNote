@@ -21,35 +21,35 @@ SugrNote is a simple personal diabetes management companion built to make daily 
 
 ## Features
 
-### 🩸 Fast & Reliable Glucose Logging
+### Fast & Reliable Glucose Logging
 
 Log your blood sugar in seconds with clear contextual tags, including Fasting, Before or After Meals (Breakfast, Lunch, Dinner, Snack), Bedtime, and Random checks. SugrNote supports both **mg/dL** and **mmol/L** with automatic conversion, guards against accidental typo values, and lets you attach personal notes to any reading.
 
-### 💉 Comprehensive Insulin Tracking
+### Comprehensive Insulin Tracking
 
 Easily record Long-Acting (basal) and Short-Acting (bolus) insulin doses. An interactive 24-hour summary card aggregates your recent intake and injection counts, while multi-week averages (7 to 90 days) help you spot dosing trends over time.
 
-### 🥗 Nutrition & Physical Activity
+### Nutrition & Physical Activity
 
-Keep track of carbohydrate intake in grams directly linked to your meals and insulin doses. You can also log exercise timing (before or after workouts), duration, and intensity to see firsthand how exercise shapes your glycemic response.
+Keep track of carbohydrate intake in grams directly linked to your meals and insulin doses. You can also log exercise timing (before or after workouts), duration, and intensity.
 
-### 📊 Trends, Averages & Time-in-Range (TIR)
+### Trends, Averages & Time-in-Range (TIR)
 
 Understand your health patterns at a glance. An interactive trend chart lets you explore raw 24-hour readings or review hourly averages across 7, 14, 30, 60, or 90 days. A visual Time-in-Range bar clearly displays the proportion of readings that fall within your target, low, or high zones, accompanied by mealtime breakdowns.
 
-### 📖 Dual-View Logbook
+### Dual-View Logbook
 
 Browse your complete history organized chronologically by day. Switch seamlessly between a **Glucose view** with color-coded status badges and an **Insulin Dose view** that summarizes total daily units and mealtime carbs. Every entry can be edited or deleted with safety confirmations.
 
-### 🔔 Live Notification & Home Screen Widget
+### Live Notification & Home Screen Widget
 
 Stay connected to your latest reading without opening the app. A persistent, color-coded notification in your status shade reflects your current glycemic range (green for in-range, red for low, amber for high). A glanceable home screen widget provides an instant snapshot and a one-tap shortcut to log new readings on the go.
 
-### 🎨 Personalization
+### Personalization
 
 Customize your target blood glucose thresholds, choose between 12-hour and 24-hour clocks, select your preferred date format, and switch between Light, Dark, or battery-friendly OLED true-black themes.
 
-### 🔒 Offline-first
+### Offline-first
 
 All data is stored exclusively on your device in a local database.
 
@@ -76,7 +76,7 @@ SugrNote is built following modern Android best practices using Kotlin and Jetpa
 
 Detailed technical documentation and database schemas are available in **[docs/README.md](docs/README.md)**.
 
-## 📥 Getting Started
+## Getting Started
 
 ### Prerequisites
 

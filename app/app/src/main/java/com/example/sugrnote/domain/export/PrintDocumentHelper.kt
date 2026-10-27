@@ -13,7 +13,7 @@ import java.io.File
 
 object PrintDocumentHelper {
 
-    fun printHtml(context: Context, htmlContent: String, jobName: String = "SugrNote_Medical_Report") {
+    fun printHtml(context: Context, htmlContent: String, jobName: String = "SugrNote_Glucose_Tracking_Report") {
         Handler(Looper.getMainLooper()).post {
             val webView = WebView(context)
             webView.webViewClient = object : WebViewClient() {

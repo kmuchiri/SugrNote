@@ -93,6 +93,28 @@ class ExportDataCalculatorTest {
         assertEquals(4, report.monthlySummaries.size) // Jul, Aug, Sep, Oct
         assertEquals(3, report.totalEntries.size)
         assertTrue(report.weeklySummaries.isNotEmpty())
+        assertEquals(3, report.dailyTrendPoints.size)
+    }
+
+    @Test
+    fun buildTirLabels_mgDl_formatsCorrectly() {
+        val labels = ExportDataCalculator.buildTirLabels(prefs)
+        assertEquals("< 54 mg/dL", labels.veryLowLabel)
+        assertEquals("54–69 mg/dL", labels.lowLabel)
+        assertEquals("70–180 mg/dL", labels.inRangeLabel)
+        assertEquals("181–250 mg/dL", labels.highLabel)
+        assertEquals("> 250 mg/dL", labels.veryHighLabel)
+    }
+
+    @Test
+    fun buildTirLabels_mmolL_formatsCorrectly() {
+        val mmolPrefs = prefs.copy(glucoseUnit = GlucoseUnit.MMOL_L)
+        val labels = ExportDataCalculator.buildTirLabels(mmolPrefs)
+        assertEquals("< 3.0 mmol/L", labels.veryLowLabel)
+        assertEquals("3.0–3.8 mmol/L", labels.lowLabel)
+        assertEquals("3.9–10.0 mmol/L", labels.inRangeLabel)
+        assertEquals("10.1–13.9 mmol/L", labels.highLabel)
+        assertEquals("> 13.9 mmol/L", labels.veryHighLabel)
     }
 
     private fun createEntry(glucose: Float, timestamp: Long): GlucoseEntry {

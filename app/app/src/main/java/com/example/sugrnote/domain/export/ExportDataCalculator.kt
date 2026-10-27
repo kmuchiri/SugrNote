@@ -2,12 +2,15 @@ package com.example.sugrnote.domain.export
 
 import com.example.sugrnote.data.local.GlucoseEntry
 import com.example.sugrnote.data.settings.UserPreferences
+import com.example.sugrnote.domain.model.GlucoseUnit
 import com.example.sugrnote.domain.model.Period
+import com.example.sugrnote.domain.util.GlucoseUnitConverter
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -41,6 +44,8 @@ object ExportDataCalculator {
         }
 
         val weeklySummaries = computeWeeklySummaries(sortedEntries, startDate, endDate, lowThresh, highThresh, zoneId)
+        val dailyTrendPoints = computeDailyTrendPoints(sortedEntries, zoneId)
+        val tirLabels = buildTirLabels(prefs)
 
         return ExportReportData(
             periodStartDate = startDate,
@@ -52,8 +57,68 @@ object ExportDataCalculator {
             mealPeriodAverages = mealPeriodAverages,
             isMultiMonth = isMultiMonth,
             monthlySummaries = monthlySummaries,
-            weeklySummaries = weeklySummaries
+            weeklySummaries = weeklySummaries,
+            dailyTrendPoints = dailyTrendPoints,
+            tirLabels = tirLabels
         )
+    }
+
+    fun buildTirLabels(prefs: UserPreferences): TirThresholdLabels {
+        val unit = prefs.glucoseUnit
+        val unitLabel = unit.displayLabel
+        val low = prefs.lowThresholdMgDl
+        val high = prefs.highThresholdMgDl
+
+        return when (unit) {
+            GlucoseUnit.MG_DL -> {
+                val lowBound = low.toInt()
+                val highBound = high.toInt()
+                TirThresholdLabels(
+                    unitLabel = unitLabel,
+                    veryLowLabel = "< 54 $unitLabel",
+                    lowLabel = "54–${maxOf(54, lowBound - 1)} $unitLabel",
+                    inRangeLabel = "$lowBound–$highBound $unitLabel",
+                    highLabel = "${highBound + 1}–250 $unitLabel",
+                    veryHighLabel = "> 250 $unitLabel"
+                )
+            }
+            GlucoseUnit.MMOL_L -> {
+                val lowMmol = GlucoseUnitConverter.mgDlToMmolL(low)
+                val highMmol = GlucoseUnitConverter.mgDlToMmolL(high)
+                val lowFormatted = GlucoseUnitConverter.format(low, GlucoseUnit.MMOL_L)
+                val highFormatted = GlucoseUnitConverter.format(high, GlucoseUnit.MMOL_L)
+                val lowSub = String.format(Locale.US, "%.1f", maxOf(3.0f, lowMmol - 0.1f))
+                val highPlus = String.format(Locale.US, "%.1f", highMmol + 0.1f)
+
+                TirThresholdLabels(
+                    unitLabel = unitLabel,
+                    veryLowLabel = "< 3.0 $unitLabel",
+                    lowLabel = "3.0–$lowSub $unitLabel",
+                    inRangeLabel = "$lowFormatted–$highFormatted $unitLabel",
+                    highLabel = "$highPlus–13.9 $unitLabel",
+                    veryHighLabel = "> 13.9 $unitLabel"
+                )
+            }
+        }
+    }
+
+    fun computeDailyTrendPoints(
+        entries: List<GlucoseEntry>,
+        zoneId: ZoneId
+    ): List<TrendPoint> {
+        if (entries.isEmpty()) return emptyList()
+
+        return entries
+            .groupBy { Instant.ofEpochMilli(it.dateTime).atZone(zoneId).toLocalDate() }
+            .toSortedMap()
+            .map { (date, dayEntries) ->
+                val dayAvg = dayEntries.map { it.glucoseMgDl }.average().toFloat()
+                TrendPoint(
+                    date = date,
+                    averageMgDl = dayAvg,
+                    count = dayEntries.size
+                )
+            }
     }
 
     fun computeMetrics(

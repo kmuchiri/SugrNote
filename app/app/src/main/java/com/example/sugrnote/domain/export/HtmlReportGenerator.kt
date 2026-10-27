@@ -52,7 +52,7 @@ object HtmlReportGenerator {
         font-style: normal;
     }
     :root {
-        --primary: #1A73E8;
+        --primary: #111923;
         --primary-bg: #E8F0FE;
         --status-in-range: #2E7D32;
         --status-in-range-bg: #E8F5E9;
@@ -282,7 +282,7 @@ object HtmlReportGenerator {
         <div class="header-left">
             <!-- SugrNote Official Droplet / S Logo -->
             <svg viewBox="0 0 53 53" width="38" height="38" xmlns="http://www.w3.org/2000/svg">
-                <rect width="53" height="53" rx="12" fill="#1A73E8"/>
+                <rect width="53" height="53" rx="12" fill="#111923"/>
                 <g transform="translate(7.4, 7.4) scale(0.72)">
                     <path d="m26.432,8.698 l-0.651,1.508c-0.954,2.209 -3.332,5.8 -6.766,10.214 -5.467,7.028 -6.861,9.617 -7.036,13.063 -0.086,1.69 -0.029,2.191 0.363,3.179 1.49,3.761 5.958,6.7 11.313,7.442 1.807,0.25 5.404,0.077 7.196,-0.346 6.945,-1.642 10.916,-6.132 9.984,-11.29 -0.566,-3.136 -2.238,-5.974 -7.414,-12.59 -3.14,-4.013 -5.144,-7.067 -6.236,-9.499zM26.996,23.301c2.508,0 6.663,0.358 7.989,0.788 0,0 2.219,3.004 3.191,4.739 0.334,0.596 0.696,1.28 0.696,1.28 -1.755,-0.752 -10.227,-0.967 -11.768,-0.967 -1.29,0 -1.863,0.143 -1.863,0.537 0,1.254 9.601,-0.287 9.601,5.911 0,4.299 -3.009,5.983 -9.601,5.983 -2.472,0 -5.803,-0.179 -7.165,-0.573 0,0 -1.508,-0.808 -2.931,-2.53 -1.811,-2.191 -1.308,-3.708 -1.308,-3.708 1.648,0.573 8.68,1.008 11.26,1.008 1.684,0 2.436,-0.179 2.436,-0.609 0,-1.254 -9.458,0.394 -9.458,-5.911 0,-4.084 3.117,-5.946 8.92,-5.946z" fill="#FFFFFF"/>
                 </g>
@@ -693,7 +693,7 @@ object HtmlReportGenerator {
             val cx = getX(i)
             val cy = getY(v)
             polylinePoints.append(String.format(Locale.US, "%.1f,%.1f ", cx, cy))
-            circleMarkers.append("""<circle cx="${"%.1f".format(Locale.US, cx)}" cy="${"%.1f".format(Locale.US, cy)}" r="3" fill="#1A73E8" stroke="#FFFFFF" stroke-width="1.5"><title>${p.date}: ${GlucoseUnitConverter.format(p.averageMgDl, unit)} ${unit.displayLabel}</title></circle>""")
+            circleMarkers.append("""<circle cx="${"%.1f".format(Locale.US, cx)}" cy="${"%.1f".format(Locale.US, cy)}" r="3" fill="#111923" stroke="#FFFFFF" stroke-width="1"><title>${p.date}: ${GlucoseUnitConverter.format(p.averageMgDl, unit)} ${unit.displayLabel}</title></circle>""")
         }
 
         val startDateLabel = points.first().date.format(DateTimeFormatter.ofPattern("MMM dd"))
@@ -736,7 +736,7 @@ object HtmlReportGenerator {
                     <text x="${padLeft - 8}" y="${padTop + plotH}" font-size="10" fill="#757575" text-anchor="end">$yMinLabel</text>
 
                     <!-- Polyline Trend -->
-                    <polyline fill="none" stroke="#1A73E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints.toString().trim()}"/>
+                    <polyline fill="none" stroke="#111923" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints.toString().trim()}"/>
 
                     <!-- Markers -->
                     $circleMarkers
@@ -748,7 +748,7 @@ object HtmlReportGenerator {
                 </svg>
             </div>
             <div style="display: flex; gap: 14px; justify-content: flex-end; font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
-                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 3px; background: #1A73E8; display: inline-block;"></span> Daily Average Trend</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 3px; background: #111923; display: inline-block;"></span> Daily Average Trend</span>
                 <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 9px; background: #E8F5E9; border: 1px solid #C8E6C9; display: inline-block;"></span> Target Range (${data.tirLabels.inRangeLabel})</span>
             </div>
         </div>

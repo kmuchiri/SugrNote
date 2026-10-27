@@ -5,6 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class SlidingWindowTest {
 
@@ -13,7 +14,7 @@ class SlidingWindowTest {
         for (months in 1..12) {
             val start = LocalDate.of(2026, 1, 15)
             val end = start.plusMonths(months.toLong())
-            assertEquals(months.toLong(), java.time.temporal.ChronoUnit.MONTHS.between(start, end))
+            assertEquals(months.toLong(), ChronoUnit.MONTHS.between(start, end))
         }
     }
 
@@ -28,6 +29,55 @@ class SlidingWindowTest {
 
         assertEquals(today, effectiveEnd)
         assertFalse(effectiveEnd.isAfter(today))
+    }
+
+    @Test
+    fun slidingWindow_whenAnchoredToToday_updatingWindowSizeMovesStartDateBack() {
+        val today = LocalDate.now()
+        var windowMonths = 3
+        var isAnchoredToToday = true
+        var startDate = today.minusMonths(windowMonths.toLong())
+
+        val initialDays = ChronoUnit.DAYS.between(startDate, today) + 1
+        // For 3 months, usually ~92-93 days
+        assertTrue(initialDays in 90..93)
+
+        // User updates window size from 3 to 4 months on the slider
+        windowMonths = 4
+        if (isAnchoredToToday) {
+            startDate = today.minusMonths(windowMonths.toLong())
+        }
+        val effectiveEnd = if (isAnchoredToToday) today else startDate.plusMonths(windowMonths.toLong())
+
+        val updatedDays = ChronoUnit.DAYS.between(startDate, effectiveEnd) + 1
+        // For 4 months, usually ~122-124 days (not 93 days!)
+        assertTrue(updatedDays in 120..124)
+        assertEquals(today, effectiveEnd)
+        assertEquals(today.minusMonths(4), startDate)
+    }
+
+    @Test
+    fun slidingWindow_whenSlidBack_keepsHistoricalStartDate() {
+        val today = LocalDate.now()
+        var windowMonths = 3
+        var isAnchoredToToday = true
+        var startDate = today.minusMonths(windowMonths.toLong())
+
+        // User slides back 3 months
+        startDate = startDate.minusMonths(windowMonths.toLong())
+        isAnchoredToToday = false
+
+        val historicalStart = startDate
+        assertEquals(today.minusMonths(6), historicalStart)
+
+        // User changes window size to 4 while in historical window
+        windowMonths = 4
+        if (isAnchoredToToday) {
+            startDate = today.minusMonths(windowMonths.toLong())
+        }
+
+        // startDate is NOT changed to today.minusMonths(4), it remains at historicalStart
+        assertEquals(historicalStart, startDate)
     }
 
     @Test

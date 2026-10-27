@@ -10,6 +10,7 @@ import com.example.sugrnote.data.settings.UserPreferences
 import com.example.sugrnote.domain.export.CsvExportGenerator
 import com.example.sugrnote.domain.export.ExportDataCalculator
 import com.example.sugrnote.domain.export.ExportReportData
+import com.example.sugrnote.domain.export.ExportSectionOptions
 import com.example.sugrnote.domain.export.HtmlReportGenerator
 import com.example.sugrnote.domain.export.PrintDocumentHelper
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,6 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 sealed class ExportState {
     object Idle : ExportState()
@@ -45,20 +45,34 @@ class ExportViewModel(
     private val _windowMonths = MutableStateFlow(3)
     val windowMonths: StateFlow<Int> = _windowMonths
 
+    private val _isAnchoredToToday = MutableStateFlow(true)
+    val isAnchoredToToday: StateFlow<Boolean> = _isAnchoredToToday
+
     private val _startDate = MutableStateFlow(LocalDate.now().minusMonths(3))
     val startDate: StateFlow<LocalDate> = _startDate
+
+    private val _sectionOptions = MutableStateFlow(ExportSectionOptions())
+    val sectionOptions: StateFlow<ExportSectionOptions> = _sectionOptions
 
     private val _exportState = MutableStateFlow<ExportState>(ExportState.Idle)
     val exportState: StateFlow<ExportState> = _exportState
 
-    val effectiveEndDate: StateFlow<LocalDate> = combine(_startDate, _windowMonths) { start, months ->
-        val end = start.plusMonths(months.toLong())
+    val effectiveEndDate: StateFlow<LocalDate> = combine(
+        _startDate,
+        _windowMonths,
+        _isAnchoredToToday
+    ) { start, months, isAnchored ->
         val today = LocalDate.now()
-        if (end.isAfter(today)) today else end
+        if (isAnchored) {
+            today
+        } else {
+            val end = start.plusMonths(months.toLong())
+            if (end.isAfter(today)) today else end
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LocalDate.now())
 
-    val canSlideForward: StateFlow<Boolean> = combine(effectiveEndDate, _startDate) { end, _ ->
-        end.isBefore(LocalDate.now())
+    val canSlideForward: StateFlow<Boolean> = combine(effectiveEndDate, _isAnchoredToToday) { end, isAnchored ->
+        !isAnchored && end.isBefore(LocalDate.now())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -84,39 +98,82 @@ class ExportViewModel(
     fun setWindowMonths(months: Int) {
         val clampedMonths = months.coerceIn(1, 12)
         _windowMonths.value = clampedMonths
+        if (_isAnchoredToToday.value) {
+            _startDate.value = LocalDate.now().minusMonths(clampedMonths.toLong())
+        }
     }
 
     fun setStartDate(date: LocalDate) {
         val today = LocalDate.now()
         val validDate = if (date.isAfter(today)) today else date
         _startDate.value = validDate
+        val expectedAnchorDate = today.minusMonths(_windowMonths.value.toLong())
+        _isAnchoredToToday.value = (validDate == expectedAnchorDate)
     }
 
     fun setAnchorToToday(months: Int) {
         val clampedMonths = months.coerceIn(1, 12)
         _windowMonths.value = clampedMonths
+        _isAnchoredToToday.value = true
         _startDate.value = LocalDate.now().minusMonths(clampedMonths.toLong())
     }
 
     fun slidePrevious() {
         val months = _windowMonths.value.toLong()
         _startDate.value = _startDate.value.minusMonths(months)
+        _isAnchoredToToday.value = false
     }
 
     fun slideNext() {
         val months = _windowMonths.value.toLong()
         val currentStart = _startDate.value
-        val currentEnd = effectiveEndDate.value
         val today = LocalDate.now()
 
-        if (!currentEnd.isBefore(today)) return
-
         val potentialNewStart = currentStart.plusMonths(months)
-        _startDate.value = if (potentialNewStart.isAfter(today)) {
-            today.minusMonths(months)
+        val maxStartForToday = today.minusMonths(months)
+        if (!potentialNewStart.isBefore(maxStartForToday)) {
+            _startDate.value = maxStartForToday
+            _isAnchoredToToday.value = true
         } else {
-            potentialNewStart
+            _startDate.value = potentialNewStart
+            _isAnchoredToToday.value = false
         }
+    }
+
+    fun togglePeriodSummary() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includePeriodSummary = !_sectionOptions.value.includePeriodSummary
+        )
+    }
+
+    fun toggleTrendChart() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includeTrendChart = !_sectionOptions.value.includeTrendChart
+        )
+    }
+
+    fun toggleMonthlySummary() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includeMonthlySummary = !_sectionOptions.value.includeMonthlySummary
+        )
+    }
+
+    fun toggleWeeklySummary() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includeWeeklySummary = !_sectionOptions.value.includeWeeklySummary
+        )
+    }
+
+    fun toggleMealtimePatterns() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includeMealtimePatterns = !_sectionOptions.value.includeMealtimePatterns
+        )
+    }
+
+    fun toggleLogbook() {
+        _sectionOptions.value = _sectionOptions.value.copy(
+            includeLogbook = !_sectionOptions.value.includeLogbook
+        )
     }
 
     fun clearState() {
@@ -126,11 +183,12 @@ class ExportViewModel(
     fun printPdf(context: Context) {
         val data = reportData.value ?: return
         val prefs = userPreferences.value
+        val options = sectionOptions.value
         viewModelScope.launch {
             _exportState.value = ExportState.Loading
             try {
                 val html = withContext(Dispatchers.Default) {
-                    HtmlReportGenerator.generate(data, prefs)
+                    HtmlReportGenerator.generate(data, prefs, options)
                 }
                 val jobName = "SugrNote_${data.periodStartDate}_to_${data.periodEndDate}"
                 PrintDocumentHelper.printHtml(context, html, jobName)
@@ -144,11 +202,12 @@ class ExportViewModel(
     fun shareHtml(context: Context) {
         val data = reportData.value ?: return
         val prefs = userPreferences.value
+        val options = sectionOptions.value
         viewModelScope.launch {
             _exportState.value = ExportState.Loading
             try {
                 val html = withContext(Dispatchers.Default) {
-                    HtmlReportGenerator.generate(data, prefs)
+                    HtmlReportGenerator.generate(data, prefs, options)
                 }
                 val fileName = "SugrNote_Report_${data.periodStartDate}_${data.periodEndDate}.html"
                 PrintDocumentHelper.saveToCacheAndShare(
@@ -168,11 +227,12 @@ class ExportViewModel(
     fun shareCsv(context: Context) {
         val data = reportData.value ?: return
         val prefs = userPreferences.value
+        val options = sectionOptions.value
         viewModelScope.launch {
             _exportState.value = ExportState.Loading
             try {
                 val csv = withContext(Dispatchers.Default) {
-                    CsvExportGenerator.generate(data, prefs)
+                    CsvExportGenerator.generate(data, prefs, options)
                 }
                 val fileName = "SugrNote_Data_${data.periodStartDate}_${data.periodEndDate}.csv"
                 PrintDocumentHelper.saveToCacheAndShare(

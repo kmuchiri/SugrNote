@@ -16,6 +16,8 @@ import com.example.sugrnote.data.repository.GlucoseRepository
 import com.example.sugrnote.data.settings.SettingsRepository
 import com.example.sugrnote.ui.entry.EntryScreen
 import com.example.sugrnote.ui.entry.EntryViewModel
+import com.example.sugrnote.ui.export.ExportScreen
+import com.example.sugrnote.ui.export.ExportViewModel
 import com.example.sugrnote.ui.logbook.LogbookScreen
 import com.example.sugrnote.ui.logbook.LogbookViewModel
 import com.example.sugrnote.ui.overview.OverviewScreen
@@ -36,6 +38,7 @@ object Routes {
     const val DATE_TIME_SETTINGS = "date_time_settings"
     const val TRENDS = "trends"
     const val ENTRY = "entry"
+    const val EXPORT = "export"
 }
 
 @Composable
@@ -115,7 +118,24 @@ fun AppNavHost(
                 },
                 onNavigateToDateTimeSettings = {
                     navController.navigate(Routes.DATE_TIME_SETTINGS)
+                },
+                onNavigateToExport = {
+                    navController.navigate(Routes.EXPORT)
                 }
+            )
+        }
+
+        composable(Routes.EXPORT) {
+            val vm: ExportViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        ExportViewModel(glucoseRepository, settingsRepository) as T
+                }
+            )
+            ExportScreen(
+                viewModel = vm,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

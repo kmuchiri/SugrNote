@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -43,7 +44,8 @@ import com.example.sugrnote.ui.overview.MyCustomFontFamily
 fun YouScreen(
     viewModel: YouViewModel,
     onNavigateToSettings: () -> Unit,
-    onNavigateToDateTimeSettings: () -> Unit
+    onNavigateToDateTimeSettings: () -> Unit,
+    onNavigateToExport: () -> Unit
 ) {
     val prefs by viewModel.userPreferences.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -118,6 +120,29 @@ fun YouScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onNavigateToDateTimeSettings)
+            )
+
+            Text(
+                "Data Management",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
+            )
+            ListItem(
+                headlineContent = { Text("Export & Medical Reports") },
+                supportingContent = { Text("Export 1–12 month sliding window to PDF, HTML, or CSV") },
+                leadingContent = {
+                    Icon(Icons.Default.FileDownload, contentDescription = null)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onNavigateToExport)
             )
 
             Text(

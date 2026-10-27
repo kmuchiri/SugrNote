@@ -29,4 +29,12 @@ class GlucoseRepository(private val dao: GlucoseEntryDao) {
     fun observeLatestLongActing(): Flow<GlucoseEntry?> = dao.observeLatestLongActing()
 
     fun observeLatestShortActing(): Flow<GlucoseEntry?> = dao.observeLatestShortActing()
+
+    fun observeEntriesBetween(startMillis: Long, endMillis: Long): Flow<List<GlucoseEntry>> =
+        dao.observeEntriesBetween(startMillis, endMillis)
+
+    suspend fun getEntriesBetween(startMillis: Long, endMillis: Long): List<GlucoseEntry> =
+        dao.getEntriesBetween(startMillis, endMillis)
+
+    suspend fun getEarliestEntryTimestamp(): Long? = dao.getEarliestEntryTimestamp()
 }

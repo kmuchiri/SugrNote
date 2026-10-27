@@ -44,4 +44,13 @@ interface GlucoseEntryDao {
 
     @Query("SELECT * FROM glucose_entries WHERE shortActingUnits IS NOT NULL ORDER BY dateTime DESC LIMIT 1")
     fun observeLatestShortActing(): Flow<GlucoseEntry?>
+
+    @Query("SELECT * FROM glucose_entries WHERE dateTime >= :startMillis AND dateTime <= :endMillis ORDER BY dateTime ASC")
+    fun observeEntriesBetween(startMillis: Long, endMillis: Long): Flow<List<GlucoseEntry>>
+
+    @Query("SELECT * FROM glucose_entries WHERE dateTime >= :startMillis AND dateTime <= :endMillis ORDER BY dateTime ASC")
+    suspend fun getEntriesBetween(startMillis: Long, endMillis: Long): List<GlucoseEntry>
+
+    @Query("SELECT MIN(dateTime) FROM glucose_entries")
+    suspend fun getEarliestEntryTimestamp(): Long?
 }

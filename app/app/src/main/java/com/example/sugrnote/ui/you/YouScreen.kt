@@ -129,7 +129,7 @@ fun YouScreen(
                 modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
             ListItem(
-                headlineContent = { Text("Export & Medical Reports") },
+                headlineContent = { Text("Export & Reports") },
                 supportingContent = { Text("Export 1–12 month sliding window to PDF, HTML, or CSV") },
                 leadingContent = {
                     Icon(Icons.Default.FileDownload, contentDescription = null)

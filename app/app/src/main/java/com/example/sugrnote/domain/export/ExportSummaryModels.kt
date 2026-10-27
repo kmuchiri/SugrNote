@@ -97,6 +97,39 @@ data class MonthlySummary(
 )
 
 /**
+ * A daily average point for the period trend line.
+ */
+data class TrendPoint(
+    val date: LocalDate,
+    val averageMgDl: Float,
+    val count: Int
+)
+
+/**
+ * Unit-aware labels for the 5-tier Time-in-Range breakdown.
+ */
+data class TirThresholdLabels(
+    val unitLabel: String,
+    val veryLowLabel: String,
+    val lowLabel: String,
+    val inRangeLabel: String,
+    val highLabel: String,
+    val veryHighLabel: String
+)
+
+/**
+ * Section inclusion options configured by user on the export screen.
+ */
+data class ExportSectionOptions(
+    val includePeriodSummary: Boolean = true,
+    val includeTrendChart: Boolean = true,
+    val includeMonthlySummary: Boolean = true,
+    val includeWeeklySummary: Boolean = true,
+    val includeMealtimePatterns: Boolean = true,
+    val includeLogbook: Boolean = true
+)
+
+/**
  * Complete consolidated data package for export generation.
  */
 data class ExportReportData(
@@ -109,5 +142,7 @@ data class ExportReportData(
     val mealPeriodAverages: List<MealPeriodAverage>,
     val isMultiMonth: Boolean,
     val monthlySummaries: List<MonthlySummary>,
-    val weeklySummaries: List<WeeklySummary>
+    val weeklySummaries: List<WeeklySummary>,
+    val dailyTrendPoints: List<TrendPoint>,
+    val tirLabels: TirThresholdLabels
 )

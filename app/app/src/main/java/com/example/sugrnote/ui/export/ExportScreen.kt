@@ -23,9 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Share
@@ -39,6 +36,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +46,6 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -67,6 +64,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sugrnote.data.settings.UserPreferences
+import com.example.sugrnote.domain.export.ExportReportData
+import com.example.sugrnote.domain.model.GlucoseUnit
 import com.example.sugrnote.domain.util.DateTimeUtils
 import com.example.sugrnote.domain.util.GlucoseUnitConverter
 import com.example.sugrnote.ui.overview.MyCustomFontFamily
@@ -90,6 +90,8 @@ fun ExportScreen(
     val canSlideForward by viewModel.canSlideForward.collectAsState()
     val matchingEntries by viewModel.matchingEntries.collectAsState()
     val reportData by viewModel.reportData.collectAsState()
+    val sectionOptions by viewModel.sectionOptions.collectAsState()
+    val isAnchoredToToday by viewModel.isAnchoredToToday.collectAsState()
     val exportState by viewModel.exportState.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -210,9 +212,10 @@ fun ExportScreen(
                         listOf(1, 3, 6, 12).forEach { months ->
                             val label = if (months == 1) "1 Month" else if (months == 12) "1 Year" else "$months Months"
                             FilterChip(
-                                selected = windowMonths == months,
+                                selected = windowMonths == months && isAnchoredToToday,
                                 onClick = { viewModel.setAnchorToToday(months) },
-                                label = { Text(label) }
+                                label = { Text(label) },
+                                leadingIcon = null
                             )
                         }
                     }
@@ -320,7 +323,7 @@ fun ExportScreen(
                 }
             }
 
-            // Card 2: Data Summary Preview
+            // Card 2: Data Summary & Period Trend Chart
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -386,39 +389,84 @@ fun ExportScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             SummaryStatBox(
-                                label = "In Range",
+                                label = "Time In Range",
                                 value = tirStr,
                                 modifier = Modifier.weight(1f)
                             )
                         }
 
-                        // Included Reports Breakdown Badges
-                        Text("Included in export:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        // Selectable Export Tags (no check marks, selectable toggles, default all active)
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Include in export (tap to toggle):",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            SuggestionChip(
-                                onClick = {},
+                            FilterChip(
+                                selected = sectionOptions.includePeriodSummary,
+                                onClick = { viewModel.togglePeriodSummary() },
                                 label = { Text("Period Summary") },
-                                icon = { Icon(Icons.Default.Check, contentDescription = null, Modifier.size(16.dp)) }
+                                leadingIcon = null,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                            FilterChip(
+                                selected = sectionOptions.includeTrendChart,
+                                onClick = { viewModel.toggleTrendChart() },
+                                label = { Text("Average Trend Line") },
+                                leadingIcon = null,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             )
                             if (reportData?.isMultiMonth == true) {
-                                SuggestionChip(
-                                    onClick = {},
-                                    label = { Text("Monthly Summary (${reportData?.monthlySummaries?.size} Mo)") },
-                                    icon = { Icon(Icons.Default.Check, contentDescription = null, Modifier.size(16.dp)) }
+                                FilterChip(
+                                    selected = sectionOptions.includeMonthlySummary,
+                                    onClick = { viewModel.toggleMonthlySummary() },
+                                    label = { Text("Monthly Summary") },
+                                    leadingIcon = null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
                                 )
                             }
-                            SuggestionChip(
-                                onClick = {},
-                                label = { Text("Weekly Summary (${reportData?.weeklySummaries?.size} Wk)") },
-                                icon = { Icon(Icons.Default.Check, contentDescription = null, Modifier.size(16.dp)) }
+                            FilterChip(
+                                selected = sectionOptions.includeWeeklySummary,
+                                onClick = { viewModel.toggleWeeklySummary() },
+                                label = { Text("Weekly Summary") },
+                                leadingIcon = null,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             )
-                            SuggestionChip(
-                                onClick = {},
+                            FilterChip(
+                                selected = sectionOptions.includeMealtimePatterns,
+                                onClick = { viewModel.toggleMealtimePatterns() },
+                                label = { Text("Mealtime Patterns") },
+                                leadingIcon = null,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                            FilterChip(
+                                selected = sectionOptions.includeLogbook,
+                                onClick = { viewModel.toggleLogbook() },
                                 label = { Text("Logbook (${matchingEntries.size} Rows)") },
-                                icon = { Icon(Icons.Default.Check, contentDescription = null, Modifier.size(16.dp)) }
+                                leadingIcon = null,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             )
                         }
                     }
@@ -468,10 +516,10 @@ fun ExportScreen(
                         ) {
                             Icon(Icons.Default.Print, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Print / Save as PDF (Medical Report)")
+                            Text("Print / Save as PDF (Glucose Tracking Report)")
                         }
                         Text(
-                            "Uses Android Print Spooler with high-resolution clinical AGP layout, TIR breakdown, and pagination.",
+                            "Uses Android Print Spooler with high-resolution layout, TIR breakdown matching ${prefs.glucoseUnit.displayLabel}, and pagination.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -507,7 +555,7 @@ fun ExportScreen(
                             Text("Share Raw Data Spreadsheet (.csv)")
                         }
                         Text(
-                            "RFC 4180 spreadsheet including period, monthly, and weekly summaries plus all logged entries.",
+                            "RFC 4180 spreadsheet including only your selected sections plus all logged entries.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
